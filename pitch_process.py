@@ -43,10 +43,14 @@ def normalize_pitch(pitch_values, max_f0, min_f0):
     return normalized
 
 def get_max_f0(pitch_values):
-    return max(pitch_values)
+    # fudge this for now until we get the speaker data hooked up
+    max_pitch = max(pitch_values) + 50
+    return max_pitch
 
 def get_min_f0(pitch_values):
-    return min(pitch_values)
+    # fudge until we get the speaker data hooked up
+    min_pitch = min(pitch_values) - 50
+    return min_pitch
 
 def voice_activity(f0, voiced_flag):
     """Return voiced frames. Deal with creaky voice somehow."""
@@ -54,22 +58,6 @@ def voice_activity(f0, voiced_flag):
     # cannot deal with creaky voice atm
     return f0[voiced_flag]
 
-# def main():
-# pyin - F0 estimate
-filename = 'data/Zh-tā.ogg.mp3'
-y, sr = librosa.load(filename)
-f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
-# print(f0)
-# print(voiced_flag)
-# print(voiced_probs)
-# times = librosa.times_like(f0)
-# handle creaky voice somewhere here
-smoothed_f0 = moving_average(voice_activity(f0, voiced_flag))
-# smoothed_f0 = voice_activity(f0, voiced_flag)
-max_f0 = get_max_f0(smoothed_f0)
-min_f0 = get_min_f0(smoothed_f0)
-normalized_values = normalize_pitch(smoothed_f0, max_f0, min_f0)
-print(normalized_values)
-# print(smoothed_f0)
-plt.plot(normalized_values)
-plt.savefig('normalize5.png')
+def extract_feature_vector(pitch_values):
+    """Return feature vector of pitch values???"""
+    pass
