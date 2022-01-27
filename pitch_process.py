@@ -43,6 +43,16 @@ def voice_activity(f0, voiced_flag):
     """Return voiced frames. Deal with creaky voice somehow."""
     # hacky method for now
     # cannot deal with creaky voice atm
+    # beginning of list 
+    start_voiced = 0
+    while not voiced_flag[start_voiced]:
+        start_voiced += 1
+    
+    end_voiced = len(voiced_flag) - 1
+    while not voiced_flag[end_voiced]:
+        end_voiced -= 1
+    voiced_flag[start_voiced:end_voiced] = True
+
     return f0[voiced_flag]
 
 def extract_feature_vector(pitch_values):

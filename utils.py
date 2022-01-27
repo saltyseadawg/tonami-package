@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 
+import pitch_process as pp
+
 
 def get_all_audiofiles(folder_path: str) -> List[str]:
     """Returns a list of audio files in found a folder and subdirectories."""
@@ -20,5 +22,11 @@ def get_tone_perfect_audiofiles(folder_path: str='data/tone_perfect/tone_perfect
 
     return [str(file) for file in Path(folder_path).rglob(filename)]
 
-def save_tone_perfect_to_text():
+def save_tone_perfect_to_json(files, syllable:str = None, spkr: int=None, sex: str=None, tone: int=None):
+    pass
+
+def parse_tone_perfect_file(filename):
+    pass
+
+
     
