@@ -1,9 +1,11 @@
+import warnings
 from curses import window
 from encodings import normalize_encoding
 from locale import normalize
 import math
 from cmath import log
 from random import uniform
+
 import librosa
 import librosa.display
 # import matplotlib
@@ -12,22 +14,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage.filters import uniform_filter1d
 
-# pyin - F0 estimate
-# filename = 'data/Zh-dàn.ogg.mp3'
-# y, sr = librosa.load(f'{filename}')
-# f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
-# times = librosa.times_like(f0)
+import utils
 
-# D = librosa.amplitude_to_db(np.abs(librosa.stft(y)), ref=np.max)
-# fig, ax = plt.subplots()
-# img = librosa.display.specshow(D, x_axis='time', y_axis='log', ax=ax)
-# ax.set(title='pYIN fundamental frequency estimation')
-# fig.colorbar(img, ax=ax, format="%+2.f dB")
-# ax.plot(times, f0, label='f0', color='cyan', linewidth=3)
-# ax.legend(loc='upper right')
-# plt.savefig('tone4.png')
-# print(times)
-# print(np.nanmean(f0))
+warnings.filterwarnings("ignore", message="PySoundFile failed. Trying audioread instead.")
 
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
 def moving_average(values, window_length: int=5):
@@ -42,15 +31,13 @@ def normalize_pitch(pitch_values, max_f0, min_f0):
         normalized.append(5 * (math.log(p, 10) - math.log(min_f0, 10)) / (math.log(max_f0, 10) - math.log(min_f0, 10)))
     return normalized
 
-def get_max_f0(pitch_values):
+def max_min_f0(pitch_tracks):
     # fudge this for now until we get the speaker data hooked up
-    max_pitch = max(pitch_values) + 50
-    return max_pitch
-
-def get_min_f0(pitch_values):
-    # fudge until we get the speaker data hooked up
-    min_pitch = min(pitch_values) - 50
-    return min_pitch
+    max_f0, min_f0 = 0, 1000
+    for track in pitch_tracks:
+        max_f0 = max(max_f0, max(track))
+        min_f0 = min(min_f0, min(track))
+    return max_f0, min_f0
 
 def voice_activity(f0, voiced_flag):
     """Return voiced frames. Deal with creaky voice somehow."""
@@ -61,3 +48,4 @@ def voice_activity(f0, voiced_flag):
 def extract_feature_vector(pitch_values):
     """Return feature vector of pitch values???"""
     pass
+
