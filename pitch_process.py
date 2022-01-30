@@ -1,3 +1,5 @@
+#%%
+# the line above is for jupyter notebook extension on VS code
 import warnings
 from curses import window
 from encodings import normalize_encoding
@@ -13,6 +15,7 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage.filters import uniform_filter1d
+import scipy.signal as signal
 
 import utils
 
@@ -55,7 +58,46 @@ def voice_activity(f0, voiced_flag):
 
     return f0[voiced_flag]
 
-def extract_feature_vector(pitch_values):
+def extract_feature_vector(amplitude):
     """Return feature vector of pitch values???"""
+    
+    feature_amplitude = extract_amplitude(amplitude)
+    feature_duration = extract_duration(amplitude)
+    # still need further development
     pass
 
+def extract_amplitude (amplitude):
+    plt.plot(y)
+    plt.show()
+    # still need to do further extraction
+    pass
+
+def extract_duration (amplitude):
+    duration = librosa.get_duration(y)
+    print(duration)
+    # still need to do further extraction
+    pass
+
+def filter_noises (amplitude):
+    # getting f0 estimation
+    f0, voiced_flag, voiced_probs = librosa.pyin(amplitude, fmin=50, fmax=300)
+    plt.plot(f0)
+    plt.show()
+
+    # exploring butterworth filter
+    sos = signal.butter(10, 300, 'low', fs=1000, output='sos')
+    filtered = signal.sosfilt(sos, amplitude)
+    plt.plot(filtered)
+    plt.show()
+
+    f0_f, voiced_flag_f, voiced_probs_f = librosa.pyin(filtered, fmin=50, fmax=300)
+    plt.plot(f0_f)
+    plt.show()
+
+    # still need further development on filtering
+    pass
+
+# y is the amplitude of the waveform, sr is the sampling rate
+y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
+feature_vector = extract_feature_vector(y)
+filter_noises(y)
