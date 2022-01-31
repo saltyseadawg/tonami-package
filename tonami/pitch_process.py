@@ -16,10 +16,44 @@ warnings.filterwarnings(
 )
 
 
+def get_voice_activity(pitch_contour, voiced_flag):
+    """
+    Returns voiced frames with beginning and end silences removed.
+
+    Args:
+
+    Returns:
+
+    """
+    # hacky method for now
+    # cannot deal with creaky voice atm
+    # beginning of list
+    start_voiced = 0
+    while not voiced_flag[start_voiced]:
+        start_voiced += 1
+
+    end_voiced = len(voiced_flag) - 1
+    while not voiced_flag[end_voiced]:
+        end_voiced -= 1
+    voiced_flag[start_voiced:end_voiced] = True
+
+    return pitch_contour[voiced_flag]
+
+
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
-def moving_average(values, window_length: int = 5):
-    """Use convolution to get rolling average???"""
-    return uniform_filter1d(values, size=window_length)
+def moving_average(signal, window_len: int = 5):
+    """
+    Uses convolution to get rolling average with a window of window_len frames.
+
+    Args:
+        signal (np.ndArray): time series to perform moving average on. most 
+            likely pitch contour, amplitude, etc.
+        window_len (int): number of frames, 5 by default
+
+    Returns:
+        np.ndArray: times series that has been moving averaged
+    """
+    return uniform_filter1d(signal, size=window_len)
 
 
 def normalize_pitch(pitch_values, max_f0, min_f0):
@@ -34,6 +68,7 @@ def normalize_pitch(pitch_values, max_f0, min_f0):
     return normalized
 
 
+# TODO: move this speaker
 def max_min_f0(pitch_tracks):
     # fudge this for now until we get the speaker data hooked up
     max_f0, min_f0 = 0, 1000
@@ -41,23 +76,6 @@ def max_min_f0(pitch_tracks):
         max_f0 = max(max_f0, max(track))
         min_f0 = min(min_f0, min(track))
     return max_f0, min_f0
-
-
-def voice_activity(f0, voiced_flag):
-    """Return voiced frames. Deal with creaky voice somehow."""
-    # hacky method for now
-    # cannot deal with creaky voice atm
-    # beginning of list
-    start_voiced = 0
-    while not voiced_flag[start_voiced]:
-        start_voiced += 1
-
-    end_voiced = len(voiced_flag) - 1
-    while not voiced_flag[end_voiced]:
-        end_voiced -= 1
-    voiced_flag[start_voiced:end_voiced] = True
-
-    return f0[voiced_flag]
 
 
 def extract_feature_vector(amplitude, frame_length):
@@ -91,10 +109,12 @@ def extract_duration(amplitude):
     pass
 
 
-def filter_noises(amplitude):
-    # getting f0 estimation
-    f0, voiced_flag, voiced_probs = librosa.pyin(amplitude, fmin=50, fmax=300)
-    plt.plot(f0)
+def filter_noise(amplitude):
+    # getting pitch_contour estimation
+    pitch_contour, voiced_flag, voiced_probs = librosa.pyin(
+        amplitude, fmin=50, fmax=300
+    )
+    plt.plot(pitch_contour)
     plt.show()
 
     # exploring butterworth filter
@@ -103,13 +123,17 @@ def filter_noises(amplitude):
     plt.plot(filtered)
     plt.show()
 
-    f0_f, voiced_flag_f, voiced_probs_f = librosa.pyin(
+    pitch_contour_f, voiced_flag_f, voiced_probs_f = librosa.pyin(
         filtered, fmin=50, fmax=300
     )
-    plt.plot(f0_f)
+    plt.plot(pitch_contour_f)
     plt.show()
 
     # still need further development on filtering
+    pass
+
+
+def median_filter(pitch_contour):
     pass
 
 
