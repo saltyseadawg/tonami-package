@@ -1,8 +1,6 @@
 from pathlib import Path
 from typing import List
 
-import pitch_process as pp
-
 
 def get_all_audiofiles(folder_path: str) -> List[str]:
     """Returns a list of audio files in found a folder and subdirectories."""

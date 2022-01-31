@@ -1,28 +1,20 @@
-#%%
 # the line above is for jupyter notebook extension on VS code
+# TODO: in final, comment out matplotlib - we want to visualize everything in visualization module
 import warnings
-from curses import window
-from encodings import normalize_encoding
-from locale import normalize
 import math
-from cmath import log
-from random import uniform
 
 import librosa
 import librosa.display
-
-# import matplotlib
-# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
 
-import utils
-
+# known error of package, we intend to use audioread.
 warnings.filterwarnings(
     "ignore", message="PySoundFile failed. Trying audioread instead."
 )
+
 
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
 def moving_average(values, window_length: int = 5):
@@ -93,7 +85,7 @@ def extract_amplitude(amplitude, frame_length):
 
 
 def extract_duration(amplitude):
-    duration = librosa.get_duration(y)
+    duration = librosa.get_duration(y)  # TODO: make sure this y is defined
     print(duration)
     # still need to do further extraction
     pass
@@ -127,52 +119,52 @@ def filter_noises(amplitude):
 # filter_noises(y)
 
 # %%
-y1_f1, sr1_f1 = librosa.load("tone_perfect_all_mp3/a1_FV1_MP3.mp3")
-y2_f1, sr2_f1 = librosa.load("tone_perfect_all_mp3/a2_FV1_MP3.mp3")
-y3_f1, sr3_f1 = librosa.load("tone_perfect_all_mp3/a3_FV1_MP3.mp3")
-y4_f1, sr4_f1 = librosa.load("tone_perfect_all_mp3/a4_FV1_MP3.mp3")
-plt.plot(y1_f1)
-plt.show()
-plt.plot(y2_f1)
-plt.show()
-plt.plot(y3_f1)
-plt.show()
-plt.plot(y4_f1)
-plt.show()
+# y1_f1, sr1_f1 = librosa.load("tone_perfect_all_mp3/a1_FV1_MP3.mp3")
+# y2_f1, sr2_f1 = librosa.load("tone_perfect_all_mp3/a2_FV1_MP3.mp3")
+# y3_f1, sr3_f1 = librosa.load("tone_perfect_all_mp3/a3_FV1_MP3.mp3")
+# y4_f1, sr4_f1 = librosa.load("tone_perfect_all_mp3/a4_FV1_MP3.mp3")
+# plt.plot(y1_f1)
+# plt.show()
+# plt.plot(y2_f1)
+# plt.show()
+# plt.plot(y3_f1)
+# plt.show()
+# plt.plot(y4_f1)
+# plt.show()
 
-y1_f2, sr1_f2 = librosa.load("tone_perfect_all_mp3/a1_FV2_MP3.mp3")
-plt.plot(y1_f1)
-plt.plot(y1_f2)
-plt.show()
+# y1_f2, sr1_f2 = librosa.load("tone_perfect_all_mp3/a1_FV2_MP3.mp3")
+# plt.plot(y1_f1)
+# plt.plot(y1_f2)
+# plt.show()
 
-y1_f3, sr1_f3 = librosa.load("tone_perfect_all_mp3/a1_FV3_MP3.mp3")
-plt.plot(y1_f1)
-plt.plot(y1_f2)
-plt.plot(y1_f3)
-plt.show()
-# %%
-amp_1024 = extract_amplitude(y1_f1, 1024)
-amp_700 = extract_amplitude(y1_f1, 700)
-amp_300 = extract_amplitude(y1_f1, 300)
-plt.plot(y1_f1)
-plt.show()
+# y1_f3, sr1_f3 = librosa.load("tone_perfect_all_mp3/a1_FV3_MP3.mp3")
+# plt.plot(y1_f1)
+# plt.plot(y1_f2)
+# plt.plot(y1_f3)
+# plt.show()
+# # %%
+# amp_1024 = extract_amplitude(y1_f1, 1024)
+# amp_700 = extract_amplitude(y1_f1, 700)
+# amp_300 = extract_amplitude(y1_f1, 300)
+# plt.plot(y1_f1)
+# plt.show()
 
-plt.plot(amp_1024)
-plt.show()
-plt.plot(amp_700)
-plt.show()
-plt.plot(amp_300)
-plt.show()
-# %%
-amp_1024 = extract_amplitude(y3_f1, 1024)
-amp_700 = extract_amplitude(y3_f1, 700)
-amp_300 = extract_amplitude(y3_f1, 300)
-plt.plot(y3_f1)
-plt.show()
+# plt.plot(amp_1024)
+# plt.show()
+# plt.plot(amp_700)
+# plt.show()
+# plt.plot(amp_300)
+# plt.show()
+# # %%
+# amp_1024 = extract_amplitude(y3_f1, 1024)
+# amp_700 = extract_amplitude(y3_f1, 700)
+# amp_300 = extract_amplitude(y3_f1, 300)
+# plt.plot(y3_f1)
+# plt.show()
 
-plt.plot(amp_1024)
-plt.show()
-plt.plot(amp_700)
-plt.show()
-plt.plot(amp_300)
-plt.show()
+# plt.plot(amp_1024)
+# plt.show()
+# plt.plot(amp_700)
+# plt.show()
+# plt.plot(amp_300)
+# plt.show()

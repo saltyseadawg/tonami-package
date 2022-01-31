@@ -20,6 +20,7 @@ jupyter-server:
 	docker run -it -p 8888:8888 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION)
 
 # code formatting
+# TODO: exclude jupyter notebook checkpoints, as they are auto saved versions of the file
 lint:
 	docker run -it  -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
 	"black tonami/ tests/; \
