@@ -1,0 +1,5 @@
+# Packages for development
+flake8==4.0.1 # formatting
+black==21.12b0 # formatting
+pytest==6.2.5 # testing
+bump2version==1.0.1 # package versioning

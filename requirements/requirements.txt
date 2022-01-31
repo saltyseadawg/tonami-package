@@ -1,4 +1,3 @@
-flake8==4.0.1
-black==21.12b0
+# Packages required to run 
 librosa==0.8.1
 praat-parselmouth==0.4.0
