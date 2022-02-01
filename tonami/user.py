@@ -1,6 +1,5 @@
 # stub for user class
 
-
 class User:
     def __init__(self, max_f0, min_f0):
         self.pitch_profile["max_f0"] = max_f0

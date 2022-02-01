@@ -40,3 +40,6 @@ def save_tone_perfect_to_json(
 
 def parse_tone_perfect_file(filename):
     pass
+
+def test_print():
+    print("hello")
