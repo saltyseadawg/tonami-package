@@ -1,3 +1,9 @@
+# TO BE DELETED!!! we want to move all of these into either
+# parse_data or load_audio
+# anything in the utils folder... i think would not be included in the stuff
+# that the user needs to run the software.
+# put all of that in tonami
+
 from pathlib import Path
 from typing import List
 
@@ -40,3 +46,6 @@ def save_tone_perfect_to_json(
 
 def parse_tone_perfect_file(filename):
     pass
+
+def test_print():
+    print("hello")
