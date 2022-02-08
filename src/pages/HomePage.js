@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { MainLayout } from '../components/MainLayout';
 import stylesHome from '../SCSS/HomePage.module.scss';
 import { Button, Row, Col } from 'reactstrap';
+import {say_hello, clear_it} from '../../__target__/hello.js';
 
 export default class Home extends Component{
   constructor( props ) {
@@ -18,6 +19,13 @@ export default class Home extends Component{
   }
 
   componentDidMount() {
+    document.getElementById("sayBtn").onclick = say_hello;
+document.getElementById("clearBtn").onclick = clear_it;
+
+var new_elem = document.createElement("u");
+  var new_content = document.createTextNode("New Content");
+  new_elem.appendChild(new_content); 
+document.getElementById("root2").replaceWith(new_elem);
     window.scrollTo(0, 0);
     this.getProjectList();
   }
@@ -41,16 +49,15 @@ export default class Home extends Component{
     var source = this.state.source;
     return(
       <MainLayout isHome={ true } {...this.props } >
-        <div id="root2">ROOT</div>
-        <div id="destination"></div>
-        <button type="button" id="sayBtn">Click Me!</button>
-        <button type="button" id="clearBtn">Clear</button>
-
         <div className={ `${ stylesHome.parallax } ${ stylesHome.bannerPic }` }  id="home" >
           <div className={ stylesHome.displayMiddle } >
             <div className={ stylesHome.name } >ROBYN CHING</div> 
           </div>
         </div>
+        <div id="root2">ROOT</div>
+        <div id="destination"></div>
+        <button type="button" id="sayBtn">Click Me!</button>
+        <button type="button" id="clearBtn">Clear</button>
         <AboutSection text={ source.aboutMe.text } />
         <SYDESection text={ source.SYDE.text } />
         <PictureParallax title="projects" />
