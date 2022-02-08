@@ -135,6 +135,29 @@ def extract_amplitude(track, window_len):
         # Therefore, these windows are NOT overlapping.
         lower = frame * window_len
         upper = (frame + 1) * (window_len) - 1
+        
+        # Finding peak values and use the median value for amplitude contour 
+        # 
+        # test = track[lower:upper]
+        # test1, _ = signal.find_peaks(test)
+        # test2 = []
+        # for i in test1:
+        #     test2.append(test[i])
+        # # plt.plot(test2)
+        # test3, _ = signal.find_peaks(test2)
+        # test4 = []
+        # for i in test3:
+        #     test4.append(test2[i])
+        # # plt.plot(test4)
+        # # plt.show()
+        # AE.append(np.median(test4))
+
+        # Using root mean square
+        # 
+        # test = track[lower:upper]
+        # rms = np.sqrt(np.mean(test**2))
+        # AE.append(rms)
+
         # Find maximum of each window and add it to our array
         AE.append(np.max(track[lower:upper]))
     return np.array(AE)
