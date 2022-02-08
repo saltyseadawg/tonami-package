@@ -1,0 +1,140 @@
+{
+    "thumbnail": {
+      "image": "tingecringelogo",
+      "alt": "Tinge Cringe Logo",
+      "name": "Tinge Cringe",
+      "description": "Mobile Game"
+    },
+    "components": [
+      {
+        "componentName": "ProjectSummary",
+        "projectName": "Tinge Cringe",
+        "tagline": "Find the tinge or get ready to cringe!",
+        "type": "Game Dev Co-op",
+        "appStore": "https://apps.apple.com/us/app/tinge-cringe/id1510033949",
+        "playStore": "https://play.google.com/store/apps/details?id=ca.zemind.tingecringe",
+        "image": {
+          "src": "tingecringelogo", 
+          "alt": "Tinge Cringe Logo"
+        },
+        "summary": "Test your colour-perception abilities with this simple but intense game! <br /><br />A mobile game built with Flutter to run on both iOS and Android. Based on the game Kuku Kube, the goal is the tap on the square that is a different shade than the rest. However, be prepared for the swapping, the spinning and the smooth elevator music. <br /><br />Created to impress <a href=\"https://www.zemind.ca/\" target=\"_blank\" rel=\"noopener noreferrer\">ZeMind Studios (employer)</a> and to annoy you."
+      },
+      {
+        "componentName": "SlideshowComponent",
+        "slideshow": [
+          {
+            "image": {
+              "src": "tingecringe-mobile-1",
+              "alt": "Tinge Cringe Main Menu"
+            },
+            "title": "Tinge Cringe Main Menu",
+            "description": "Main menu features squares of randomly generated colours."
+          },
+          {
+            "image": {
+              "src": "tingecringe-mobile-2",
+              "alt": "Tinge Cringe Lvl 1"
+            },
+            "title": "Tinge Cringe Lvl 1",
+            "description": "Level 1, easy right?"
+          },
+          {
+            "image": {
+              "src": "tingecringe-mobile-3",
+              "alt": "Tinge Cringe Lvl 15"
+            },
+            "title": "Tinge Cringe Lvl 15",
+            "description": "Level 15, grid exapnds and the off colour swaps"
+          },
+          {
+            "image": {
+              "src": "tingecringe-mobile-4",
+              "alt": "Tinge Cringe Lvl 40"
+            },
+            "title": "Tinge Cringe Lvl 40",
+            "description": "Level 40, grid continues off-screen and squares spin and shrink."
+          }
+        ]
+      },
+      {
+        "componentName": "TableComponent",
+        "title": "Progress",
+        "leftTitle": "Date",
+        "rightTitle": "Update Description",
+        "list": [
+          {
+            "left": "2020/04/24", 
+            "right": [
+                "Added 'Other Games' module'",
+                "App was submitted to App store and Google Play store"
+            ]
+          },
+          {
+            "left": "2020/04/09", 
+            "right": [
+                "Added random background colour generation",
+                "Colour generation adjustment",
+                "Fixed audio bugs"
+            ]
+          },
+          {
+            "left": "2020/01/10", 
+            "right": [
+                "Basic game mechanics <ul><li>Game logic</li><li>Random colour generation</li><li>Grid enlargement</li><li>Square swapping</li><li>Square shrinking</li><li>Square spinning</li><Randomly generated game over text</li></ul>",
+                "Sound effects and background music added",
+                "Randomly generated colours and squares across main menu"
+            ]
+          }
+        ]
+      },
+      {
+        "componentName": "TableComponent",
+        "title": "Meet The Team",
+        "leftTitle": "Name",
+        "rightTitle": "Contribution",
+        "list": [
+          { 
+            "left": "Robyn Ching",
+            "right": [
+              "Audio design",
+              "Idea generation"
+            ]
+          },
+          { 
+            "left": "<a href=\"https://github.com/gabrielsiu\" target=\"_blank\" rel=\"noopener noreferrer\">Gabriel Siu</a>",
+            "right": [
+              "Colour generation",
+              "'Other Games' module",
+              "Main menu squares background",
+              "Idea generation"
+            ]
+          },
+          { 
+            "left": "Kenneth Tjie",
+            "right": [
+              "Spinning, shrinking, level logic, audio,",
+              "'Other Games' module",
+              "Main menu squares background",
+              "Idea generation"
+            ]
+          },
+          { 
+            "left": "<a href=\"https://www.zemind.ca/\" target=\"_blank\" rel=\"noopener noreferrer\">ZeMind Studios</a>",
+            "right": [
+              "Advice",
+              "Art assets",
+              "App store and Google Play store submission"
+            ]
+          }
+        ]
+      },
+      {
+        "componentName": "ListComponent",
+        "title": "Key Takeaways",
+        "list": [
+          "Flutter basics",
+          "Audio design"
+        ]
+      }
+    ]
+  }

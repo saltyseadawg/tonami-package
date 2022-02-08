@@ -1,5 +1,7 @@
 data/
 tone_perfect_all_mp3/
+node_modules/
+**/__target__/
 *.png
 Pipfile
 

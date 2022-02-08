@@ -1,0 +1,163 @@
+{
+  "thumbnail": {
+    "image": "react-js",
+    "alt": "React JS Logo",
+    "name": "personal-website-repo",
+    "description": "Personal Website"
+  },
+  "components": [
+    {
+      "componentName": "ProjectSummary",
+      "projectName": "rochi138.github.io/personal-website-repo",
+      "tagline": "It's time to meet my maker",
+      "type": "Personal Project",
+      "image": {
+        "src": "react-js", 
+        "alt": "React JS logo"
+      },
+      "summary": "This website was created because I'm more than just a one page resume. I'm also a website with a lot of links, images and text. <br /><br />The real reason is because my second co-op job was at <a href=\"https://www.peekapak.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Peekapak</a> as a Frontend developer. The four months there made me reflect on some parts of myself and how I can use my time there to my greatest advantage.<br /><br />This site appeals to my personal beliefs and short-comings.<ul><li>I wanted to walk away with a tangible representation of the knowledge and skills I gained from this experience.</li><li>I often forget syntax and how to connect various parts of code together. This is a template of re-usable code for personal use.</li><li>I learn best by applying what I learned in a practical way. By creating a website on my own, from start to end, I can understand the process of implementing JavaScript, SCSS and Bootstrap.</li></ul>Created to impress you."
+    },
+    {
+      "componentName": "SlideshowComponent",
+      "slideshow": [
+        {
+          "image": {
+            "src": "screenshot-website-json", 
+            "alt": "Website.json screenshot"
+          },
+          "title": "Website.json Screenshot",
+          "description": "Screenshot of JSON file containing all the information for this page."
+        },
+        {
+          "image": {
+            "src": "screenshot-projectpages-js", 
+            "alt": "ProjectPages.js screenshot"
+          },
+          "title": "ProjectPages.js Screenshot",
+          "description": "Information from website.json is imported and based on componentName, will render appropriate components to display information."
+        },
+        {
+          "image": {
+            "src": "screenshot-pagecomponents-js", 
+            "alt": "PageComponents.js screenshot"
+          },
+          "title": "PageComponents.js Screenshot",
+          "description": "Website.js uses these components to display and format the information from website.json"
+        }
+      ]
+    },
+    {
+      "componentName": "TableComponent",
+      "title": "Progress",
+      "link": "https://github.com/rochi138/personal-website-repo",
+      "leftTitle": "Date",
+      "rightTitle": "Update Description",
+      "list": [
+      {
+        "left": "2019/09/28", 
+        "right": [
+          "<b>Automated Project Addition:</b>",
+          "<ul><li>Draws project names from array in Constants.js and automatically generates URLs</li><li>Sorts projects by latest update date and displays them in that order.</li><li>Allows slideshow navigation through projects</li></ul>",
+          "Completely redesigned desktop and mobile header",
+          "<ul><li><b>Project Slideshow:</b> (go left and right through all projects)</li><li>Overall better navigation</li></ul>",
+          "Enabled dark mode",
+          "Added Fontawesome icons"
+        ]
+      },
+      {
+        "left": "2019/01/15", 
+        "right": [
+          "Complete overhaul of website complete",
+          "Website is in a presentable and stable state. More features will be added in the future (see Future Features)",
+          "Added features:",
+          "<ul><li><b>React App:</b> website is no longer pure hard-coded HTML and has multiple pages</li><li><b>Mobile view:</b> website has a decent (or at least passable) layout on mobile devices; check out homepage Interests</li><li><b>Page Templating:</b> project pages are all generated based on one template</li><li><b>JSON Storage:</b> project pages are procedurally generated from JSON files</li><li><b>Slideshow:</b> images on individual project pages can be viewed with a slideshow modal</li><li><b>Opacity:</b> homepage projects, hompage interests and project page images will all change opacity when hovered</li><li><b>SCSS:</b> converted all CSS to SCSS for maintainability</li><li><b>Information:</b> updated images, 'About Me', resume, 'Projects', and 'Interests'</li><li>Removed any old and non-functional features from old version</li></ul>"
+        ]
+      },
+      {
+        "left": "2018/11/26", 
+        "right": [
+          "Complete overhaul of website begins.",
+          "Due to newly gained experience and a better overall idea, website will be revamped to include new features, updated information and better software maintainability"
+        ]
+      },
+      {
+        "left": "2018/05/07", 
+        "right": [
+          "Site was created for co-op applications.",
+          "Copied <a href=\"https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm\" target=\"_blank\" rel=\"noopener noreferrer\">Parallex Template</a> from <a href=\"https://www.w3schools.com/\" target=\"_blank\" rel=\"noopener noreferrer\">W3Schools</a>.",
+          "Due to lack of experience in HTML, CSS and JavaScript, site was left in a half-finished, unpresentable state."
+        ]
+      }
+    ]
+    },
+    {
+      "componentName": "TableComponent",
+      "title": "Meet The Team",
+      "leftTitle": "Name",
+      "rightTitle": "Contribution",
+      "list": [
+        { 
+          "left": "Robyn Ching",
+          "right": [
+            "User Interface",
+            "React.js",
+            "SCSS"
+          ]
+        },
+        { 
+          "left": "<a href=\"https://mensshi.github.io/\" target=\"_blank\" rel=\"noopener noreferrer\">Amy Lu</a>",
+          "right": [
+            "Art assets for the FowlPlay."
+          ]
+        },
+        { 
+          "left": "<a href=\"https://silvree.github.io/\" target=\"_blank\" rel=\"noopener noreferrer\">Silvia George</a>",
+          "right": [
+            "Web design consultations."
+          ]
+        },
+        { 
+          "left": "Others",
+          "right": [
+            "Every team member for the projects that have made it onto this site.",
+            "Validation of designs and text edits.",
+            "Originally copied <a href=\"https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm\" target=\"_blank\" rel=\"noopener noreferrer\">Parallex Template</a> from <a href=\"https://www.w3schools.com/\" target=\"_blank\" rel=\"noopener noreferrer\">W3Schools</a>."
+          ]
+        },
+        { 
+          "left": "<a href=\"https://www.w3schools.com/\" target=\"_blank\" rel=\"noopener noreferrer\">W3Schools</a>",
+          "right": [
+            "Site is based off of <a href=\"https://www.w3schools.com/w3css/tryw3css_templates_parallax.htm\" target=\"_blank\" rel=\"noopener noreferrer\">Parallex Template</a>."
+          ]
+        }
+      ]
+    },
+    {
+      "componentName": "ListComponent",
+      "title": "Key Takeaways",
+      "list": [
+        "Knowledge of ReactJS and SCSS.",
+        "Basic project and feature planning.",
+        "Understanding user-readability and experience"
+      ]
+    },
+    {
+      "componentName": "ListComponent",
+      "title": "Future Features",
+      "list": [
+        "HTML<ul><li>Spinner</li><li>Default fonts</li></ul>",
+        "Enable e-mailing ability",
+        "JSON Editor<ul><li>use draft-js</li><li>can create new JSON file</li><li>can load current JSON file</li><li>can edit current JSON file</li><li>can save edited JSON file</li><li>can use calendar import to fill in dates</li></ul>"
+      ]
+    },
+    {
+      "componentName": "ListComponent",
+      "title": "Image Credits",
+      "list": [
+        "Mukhin, Daniil. \"D20 dice roleplay tabletop icon\". IconFinder. <a href=\"https://www.iconfinder.com/icons/3057713/d20_dice_roleplay_tabletop_icon\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.iconfinder.com/icons/3057713/d20_dice_roleplay_tabletop_icon</a>",
+        "Raevskaya, Polina. \"Collection final glasses harry potter round scar\". IconFinder. <a href=\"https://www.iconfinder.com/icons/763137/collection_final_glasses_harry_potter_round_scar_icon\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.iconfinder.com/icons/763137/collection_final_glasses_harry_potter_round_scar_icon</a>",
+        "Random Curiosity. April 10, 2018. <a href=\"https://randomc.net/2018/04/10/golden-kamuy-01/\" target=\"_blank\" rel=\"noopener noreferrer\">https://randomc.net/2018/04/10/golden-kamuy-01/</a>"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "thumbnail": {
+    "image": "halp",
+    "alt": "Then Perish meme cat",
+    "name": "Hire Me Pwease",
+    "description": "Terrible Resume Generator"
+  },
+  "components": [
+    {
+      "componentName": "ProjectSummary",
+      "projectName": "Hire Me Pwease",
+      "tagline": "Pwease Mr. Obama, may I have a job?",
+      "type": "Personal Project",
+      "link": "https://rochi138.github.io/hire-me-pwease",
+      "image": {
+        "src": "halp", 
+        "alt": "Then Perish meme cat"
+      },
+      "summary": "What if you could fill out a few simple questions and have the perfect resume that reflects your half-assed attitude?<br /><br />Website to take in information from a user through a form and uses PHP to generate a resume with the provided information. All information missing will be filled in with random content (ex. 19 years of experience in breathing). The site allows the user to download the resume as a pdf... with the download button in it.<br /><br />Created for Terrible Hacks XII."
+    },
+    {
+      "componentName": "AwardsComponent",
+      "image": {
+        "src": "hiremepwease-award", 
+        "alt": "First Place Award"
+      },
+      "header": "Won First Place"
+    },
+    {
+      "componentName": "SlideshowComponent",
+      "slideshow": [
+        {
+          "image": {
+            "src": "hiremepwease-v1",
+            "alt": "Hire Me Pwease v1"
+          },
+          "title": "Hire Me Pwease v1",
+          "description": "Original version of Hire Me Pwease presented at Terrible Hack"
+        },
+        {
+          "image": {
+            "src": "hiremepwease-v2",
+            "alt": "Hire Me Pwease v2 Form"
+          },
+          "title": "Hire Me Pwease v2 Form",
+          "description": "Homepage of Hire Me Pwease.<br />Takes in information to generate resume from."
+        },
+        {
+          "image": {
+            "src": "hiremepwease-v2-dark",
+            "alt": "Hire Me Pwease v2 Form (Dark mode)"
+          },
+          "title": "Hire Me Pwease v2 Form (Dark mode)",
+          "description": "Dark version of Hire Me Pwease homepage."
+        },
+        {
+          "image": {
+            "src": "hiremepwease-v2-resume",
+            "alt": "Hire Me Pwease v2 Resume"
+          },
+          "title": "Hire Me Pwease v2 Resume",
+          "description": "Example resume generated"
+        },
+        {
+          "image": {
+            "src": "hiremepwease-v2-resume-dark",
+            "alt": "Hire Me Pwease v2 Resume (Dark mode)"
+          },
+          "title": "Hire Me Pwease v2 Resume (Dark mode)",
+          "description": "Dark version of generated resume"
+        }
+      ]
+    },
+    {
+      "componentName": "TableComponent",
+      "title": "Progress",
+      "link": "https://github.com/rochi138/hire-me-pwease",
+      "leftTitle": "Date",
+      "rightTitle": "Update Description",
+      "list": [
+        {
+          "left": "2019/09/18", 
+          "right": [
+            "Converted completely to a React App",
+            "Downloads generated resume pdf",
+            "Stores all options in JSONs",
+            "Fake Nyan Cat loading screen",
+            "Randomized offset function",
+            "Added dark mode",
+            "FontAwesome icons"
+          ]
+        },
+        {
+          "left": "2019/01/13", 
+          "right": [
+            "Reconstruction begins"
+          ]
+        },
+        {
+          "left": "2018/10/20", 
+          "right": [
+            "Site form is created",
+            "Site uses PHP",
+            "Goose \"Kill Me\" watermark",
+            "\"Download\" button is downloaded with pdf",
+            "Inputs random hobbies",
+            "Evokes randomized off-set function",
+            "Uses resume template"
+          ]
+        }
+      ]
+    },
+    {
+      "componentName": "TableComponent",
+      "title": "Meet The Team",
+      "leftTitle": "Name",
+      "rightTitle": "Contribution",
+      "list": [
+        { 
+          "left": "Robyn Ching",
+          "right": [
+            "Converted webpage to React app",
+            "Added fake loading screen",
+            "Created the resume template.",
+            "Draws information from JSONs",
+            "Implemented ability to download webpage as pdf.",
+            "Added dark mode"
+          ]
+        },
+        { 
+          "left": "<a href=\"https://mensshi.github.io/\" target=\"_blank\" rel=\"noopener noreferrer\">Amy Lu</a>",
+          "right": [
+            "Set up PHP to transfer data between form and resume.",
+            "Created off-set function."
+          ]
+        },
+        { 
+          "left": "Sabrina Yu",
+          "right": [
+            "Created the form to take in user data."
+          ]
+        },
+        { 
+          "left": "<a href=\"https://www.youtube.com/channel/UC3VHfy8e1jbDnT5TG2pjP1w\" target=\"_blank\" rel=\"noopener noreferrer\">saraj00n/Means TV</a>",
+          "right": [
+            "Creater/Owner of <a href=\"https://www.youtube.com/watch?v=QH2-TGUlwu4\" target=\"_blank\" rel=\"noopener noreferrer\">Nyan Cat</a>."
+          ]
+        }
+      ]
+    },
+    {
+      "componentName": "ListComponent",
+      "title": "Key Takeaways",
+      "list": [
+        "All members expanded knowledge of web development.",
+        "Organization of group members to focus on individual portions that suited their abilities."
+      ]
+    }
+  ]
+}

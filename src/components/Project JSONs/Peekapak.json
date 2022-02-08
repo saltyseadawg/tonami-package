@@ -1,0 +1,76 @@
+{
+  "thumbnail": {
+    "image": "peekapak-logo",
+    "alt": "Peekapak Logo",
+    "name": "Peekapak Lessons",
+    "description": "Frontend Co-op",
+    "date": "2018/12/21"
+  },
+  "components": [
+    {
+      "componentName": "ProjectSummary",
+      "projectName": "Peekapak Frontend",
+      "tagline": "Let's get PAK-ing!",
+      "type": "Frontend Co-op",
+      "image": {
+        "src": "peekapak-logo",
+        "alt": "Peekapak Logo"
+      },
+      "summary": "<a href=\"https://www.peekapak.com\" target=\"_blank\" rel=\"noopener noreferrer\">Peekapak</a> is a social-emotional learning company that creates curriculumns for teachers. A teacher is able to log in and open lesson plans that include story books, discussion questions, in-class assignments and home activities.<br /><br />My primary contribution to the company was implementing lessons for newly added grades. Previously the company provided curriculumns up to Grade 3, but had recently expanded to include Grades 4 and 5. Aside from creating and editing JSON files, the website had to be updated to allow teachers to create new classrooms and to view the new content.<br /><br />Once all available lessons were uploaded, I worked on the Publisher, which allows content-creaters to make the lessons without a developer. ~90% functionality was tested successfully and was able to upload majority of content.<br />Publisher functions include:<ul><li>Undo/Redo stack</li><li>Rich text editing</li><li>Creates and deletes sections of a list</li><li>Preview</li><li>Load content from database</li><li>Saves and publishes content to database</li><ul>"
+    },
+    {
+      "componentName": "SlideshowComponent",
+      "slideshow": [
+        {
+          "image": {
+            "src": "NewLessons",
+            "alt": "Peekapak New Lessons"
+          },
+          "title": "Peekapak New Lessons",
+          "description": "Layout of new lesson content"
+        },
+        {
+          "image": {
+            "src": "PublisherFull",
+            "alt": "Peekapak Publisher Full Screen"
+          },
+          "title": "Publisher Full Screen",
+          "description": "Peekapak Publisher including sidebar.<ul><li>Loads unit content</li><li>Navigates to different subunits</li><li>Opens standards page</li></ul>"
+        },
+        {
+          "image": {
+            "src": "PublisherOverview",
+            "alt": "Peekapak Publisher Overview"
+          },
+          "title": "Publisher Overview",
+          "description": "Peekapak Publisher Overview<ul><li><b>About</b> field uses draft-js to have undo/redo stack and enables rich text.</li><li><b>Learning Objectives</b> is able to move and delete sections</li><li><b>Prologue</b> is able to add, edit, move and delete sections</li></ul>"
+        },
+        {
+          "image": {
+            "src": "PublisherSubunit",
+            "alt": "Peekapak Publisher Subunit"
+          },
+          "title": "Publisher Subunit",
+          "description": "Peekapak Publisher Subunit view<ul><li>Fields display prompts and examples</li><li>Lesson panel only has fields that are relevant</li></ul>"
+        },
+        {
+          "image": {
+            "src": "PublisherStandards",
+            "alt": "Peekapak Publisher Standards"
+          },
+          "title": "Publisher Standards",
+          "description": "Built from scratch.<ul><li>User transfers standard from overall list to activity list.</li><li>Displays standard description when 'Read More' (not visible in image) is clicked.</li><li>Search function goes through standard name, category name and description</li></ul>"
+        }
+      ]
+    },
+    {
+      "componentName": "ListComponent",
+      "title": "Key Takeaways",
+      "list": [
+        "Great understanding of ReactJS, SCSS and HTML; previously did not have any knowledge",
+        "Understanding of general web-development",
+        "Deeper understanding of Agile and Scrum"
+      ]
+    }
+  ]
+}

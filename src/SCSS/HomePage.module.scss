@@ -1,0 +1,181 @@
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 0.75;
+	position: relative;
+
+    .displayMiddle{
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
+			-ms-transform: translate(-50%,-50%);
+			whiteSpace: nowrap;
+
+		.name{
+			text-align:center;
+			padding:12px 24px;
+			color:#ffffff;
+			background-color:#000000;
+			font-size:24px;
+			letter-spacing:10px;
+		}
+
+		.sectionName{
+			text-align:center;
+			padding:12px 24px;
+			color:#ffffff;
+			font-size:24px;
+			letter-spacing:5px;
+		}
+	}
+}
+
+.bannerPic {
+	background-image: url("../images/robynHeader.jpg");
+    min-height: 100vh;
+}
+
+.projectsPic {
+	background-image: url("../images/fowlPlayBanner.jpg");
+}
+
+.contactPic {
+	background-image: url("../images/robynContact.jpg");
+}
+
+.interestsPic {
+	background-image: url("../images/robynInterests.jpg");
+}
+
+.projectsPic, .contactPic, .interestsPic {
+	min-height: 400px;
+}
+
+.sectionContainer {
+	margin-left: auto;
+	margin-right: auto;
+	max-width:980px;
+	padding:64px 16px;
+	padding-top:64px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	&:before, &:after {
+		content: "";
+		display: table;
+		clear: both;
+	}
+
+	h3 {
+		text-align: center;
+	}
+
+	.subTitle {
+		font-style: italic;
+		text-align: center;
+		margin-bottom: 12px;
+	}
+
+	@media screen and (max-width: 800px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.interestsWrapper {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+
+	@media screen and (max-width: 800px) {
+	  flex-direction: column;
+	}
+
+	.openInterests {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		.text {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		@media screen and (max-width: 800px) {
+		  flex-direction: column;
+		  width: 100%;
+		}
+	}
+
+	.interestsBar {
+		flex: 0 1 12em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+
+		.option {
+			height: 3em;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			flex: none;
+			cursor: pointer;
+
+			@media screen and (max-width: 800px) {
+				flex-basis: 0;
+				height: 10vw;
+			}
+
+			.text {
+				width: 8em;
+				white-space: wrap;
+				text-align: center;
+			}
+		}
+
+		@media screen and (max-width: 800px) {
+		  flex-direction: row;
+		  justify-content: center;
+		  flex-basis: 3em;
+		}
+	}
+}
+
+.floatContainer {
+	margin-top: 2em;
+	text-align: center;
+
+	&:after {
+	  content: "";
+	  clear: both;
+	  display: table;
+	}
+
+	.profilePic {
+		width: 40vw;
+		max-height: 333px;
+		object-fit: contain;
+		max-width: 300px;
+		padding: 5px;
+		float: left;
+
+		@media screen and (max-width: 800px) {
+		  float: none;
+		  margin-left: auto;
+		  margin-right: auto;
+		}
+
+	}
+}
+
+.hideMobile {
+	@media screen and (max-width: 800px) {
+	  display: none!important;
+	}
+}
