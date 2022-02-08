@@ -19,6 +19,9 @@ pull-image:
 jupyter-server:
 	docker run -it -p 8888:8888 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION)
 
+front-end:
+	python3 -m http.server
+
 # code formatting
 # TODO: exclude jupyter notebook checkpoints, as they are auto saved versions of the file
 lint:
