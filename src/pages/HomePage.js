@@ -41,6 +41,11 @@ export default class Home extends Component{
     var source = this.state.source;
     return(
       <MainLayout isHome={ true } {...this.props } >
+        <div id="root2">ROOT</div>
+        <div id="destination"></div>
+        <button type="button" id="sayBtn">Click Me!</button>
+        <button type="button" id="clearBtn">Clear</button>
+
         <div className={ `${ stylesHome.parallax } ${ stylesHome.bannerPic }` }  id="home" >
           <div className={ stylesHome.displayMiddle } >
             <div className={ stylesHome.name } >ROBYN CHING</div> 
