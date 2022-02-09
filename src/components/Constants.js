@@ -1,9 +1,5 @@
 export const ProjectList= [
-    "Peekapak",
-    "Website",
-    "HireMePwease",
-    "FowlPlay",
-    "TingeCringe"
+    "Peekapak"
 ]
 
 export const HomePageSections= [
@@ -14,13 +10,5 @@ export const HomePageSections= [
     {
         title: "projects",
         icon: "fa fa-th"
-    },
-    {
-        title: "contact",
-        icon: "fa fa-envelope"
-    },
-    {
-        title: "interests",
-        icon: "fa fa-heart"
     }
 ]

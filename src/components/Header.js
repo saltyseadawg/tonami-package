@@ -40,12 +40,9 @@ export default class Header extends Component{
         <WidthHandleLayout>
           <div className={ styles.bar } mobileonly="true">
             <div className={ styles.barItem } onClick={ () => this.handleOnClick( 'home' ) }><i className="fa fa-home" /></div>
-            <ThemeToggle theme={ this.props.state.theme } setState={ this.props.setState } />
           </div>
           <div className={ styles.bar } desktoponly="true">
             <div className={ styles.barItem } onClick={ () => this.handleOnClick( 'home' ) }><i className="fa fa-home" /> HOME</div>
-            <div style={{flex: 1}} />
-            <ThemeToggle theme={ this.props.state.theme } setState={ this.props.setState } />
           </div>
         </WidthHandleLayout>
       )
@@ -53,8 +50,6 @@ export default class Header extends Component{
       <WidthHandleLayout>
         <div className={ styles.bar }>
           <div style={{ width: "8em", textAlign: "right"}}><div className={ styles.barItem } onClick={ () => this.handleOnClick( 'home' ) }><i className="fa fa-home" /><div className={ styles.iconText }> HOME</div></div></div>
-          <div style={{flex: 1}} />
-          <ThemeToggle theme={ this.props.state.theme } setState={ this.props.setState } />
         </div>
       </WidthHandleLayout>
     )
@@ -75,19 +70,6 @@ class WidthHandleLayout extends Component {
               React.cloneElement(child, { style: child.props.desktoponly ? { display: "none" } : { ...child.props.style }})
           ))}
         </div>
-      </div>
-    )
-  }
-}
-
-class ThemeToggle extends Component {
-  render(){
-    return( 
-      <div style={{ width: "8em", textAlign: "right"}}>
-        { this.props.theme === "default"
-          ? <div className={ styles.barItem } style={{ float: "right" }} onClick={ () => this.props.setState({ theme: "dark" })}><i className="fa fa-moon" /><div className={ styles.iconText }> DARK</div></div>
-          : <div className={ styles.barItem } style={{ float: "right" }} onClick={ () => this.props.setState({ theme: "default" })}><i className="fa fa-sun" /><div className={ styles.iconText }> DEFAULT</div></div>
-        }
       </div>
     )
   }

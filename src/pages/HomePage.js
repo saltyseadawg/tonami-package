@@ -5,7 +5,7 @@ import { Button, Row, Col } from 'reactstrap';
 import {say_hello, clear_it} from '../../__target__/hello.js';
 
 export default class Home extends Component{
-  constructor( props ) {
+  constructor() {
     super();
 
     var source=require('./HomePage.json');
@@ -31,7 +31,7 @@ export default class Home extends Component{
   render(){
     var source = this.state.source;
     return(
-      <MainLayout isHome={ true } {...this.props } >
+      <MainLayout isHome={ true }>
         <div>space space</div>
         <div>space space</div>
         <div id="root2">ROOT</div>

@@ -1,14 +1,21 @@
-@import 'themes.scss';
+$backgroundColor: #262626;
+$textColor: #dddddd;
+$buttonTextColor: #aaa;
+$buttonTextTransform: uppercase;
+$buttonTextHoverColor: #ddd;
+$buttonColor: #333;
+$buttonBorder: 1px solid #aaa;
+$headerBackgroundColor: black;
+$borderColor: 2px solid #dddddd;
+$linkColor: #61dafb;
 
 .App {
   text-align: center;
 }
 
 .app-container {
-  @include themify($themes) {
-    color: themed('textColor');
-    background-color: themed('backgroundColor');
-  }
+  color: $textColor;
+  background-color: $backgroundColor;
 
   .title {
     font-family: sans-serif;
@@ -22,55 +29,41 @@
     display: inline-block;
     transition: color 0.1s, border-color 0.1s, background-color 0.1s;
 
-    @include themify($themes) {
-      border: themed('buttonBorder');
-      color: themed('buttonTextColor'); 
-      border-color: themed('buttonTextColor');
-      background-color: themed('buttonColor');
-      text-transform: themed('buttonTextTransform');
+    color: $buttonTextColor;
+    border: $buttonBorder; 
+    border-color: $buttonTextColor;
+    background-color: $buttonColor;
+    text-transform: $buttonTextTransform;
 
-      &:hover {
-        color: themed('buttonTextHoverColor'); 
-        border-color: themed('buttonTextHoverColor');
-        background-color: themed('buttonHoverColor');
-      }
+    &:hover {
+      color: $buttonTextHoverColor; 
+      border-color: $buttonTextHoverColor;
+      background-color: $buttonTextHoverColor;
     }
   }
   
   .heading {
-    @include themify($themes) {
-        color: themed('textColor');  
-        background-color: themed('backgroundColor');
-    }
+    color: $textColor;
+    background-color: $backgroundColor;
   }
 
   label {
-    @include themify($themes) {
-      background-color: themed('backgroundColor');
-    }
+    background-color: $backgroundColor;
   }
   
   a {
-    @include themify($themes) {
-      color: themed('linkColor');
-    }
+    color: $linkColor;
   }
 }
 
 .custom-control-label::before{
-  @include themify($themes) {
-    background-color: themed('textColor');
-  }
+  color: $textColor;
 }
 
 .listItem {
-  @include themify($themes) {
-    border-top: themed('borderColor');
-  }
+  border-top: $buttonColor;
 }
 
 .header {
-  @include themify($themes) {
-    background-color: themed('headerBackgroundColor');
-  }
+  background-color: $headerBackgroundColor;
 }

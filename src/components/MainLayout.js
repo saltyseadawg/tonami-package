@@ -7,12 +7,10 @@ export class MainLayout extends Component{
     if ( index !== -1 )
       this.props.history.push( '/' + window.location.href.slice( index + 5 ) )
     return(
-      <div className={ "app-defaults theme-" + this.props.state.theme } id="main">
-        <div className="app-container">
-          <Header {...this.props} />
-          { React.Children.map( this.props.children, child =>
-              React.cloneElement( child ),)}
-        </div>
+      <div className="app-container" id="main">
+        <Header {...this.props} />
+        { React.Children.map( this.props.children, child =>
+            React.cloneElement( child ),)}
       </div>
       );
   }
