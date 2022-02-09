@@ -1,4 +1,3 @@
-$backgroundColor: #262626;
 $textColor: #dddddd;
 $buttonTextColor: #aaa;
 $buttonTextTransform: uppercase;
@@ -15,14 +14,17 @@ $linkColor: #61dafb;
 
 .app-container {
   color: $textColor;
-  background-color: $backgroundColor;
+  height: 100vh;
+  width: 80vw;
+	margin: auto;
+	padding-right: 8em;
+	padding-left: 8em;
 
-  .title {
-    font-family: sans-serif;
-    font-weight: lighter;
+	@media screen and (max-width: 800px) {
+    padding: 0 2em;
   }
 
-  .button {
+  button {
     cursor: pointer;
     border-radius: 5px;
     padding: 15px 32px;
@@ -42,28 +44,29 @@ $linkColor: #61dafb;
     }
   }
   
-  .heading {
-    color: $textColor;
-    background-color: $backgroundColor;
-  }
-
-  label {
-    background-color: $backgroundColor;
-  }
-  
   a {
     color: $linkColor;
   }
-}
 
-.custom-control-label::before{
-  color: $textColor;
-}
-
-.listItem {
-  border-top: $buttonColor;
-}
-
-.header {
-  background-color: $headerBackgroundColor;
+  .toHome {
+    position: fixed;
+    background-color: #000000;
+    color: #FFFFFF;
+    opacity: 0.60;
+    cursor:pointer;
+    top: 25px;
+    left: 25px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    z-index: 2;
+  
+    &:hover { opacity: 1; }
+  
+    i {
+      font-size: 2em;
+      transform: translateY(25%);
+    }
+  }
 }

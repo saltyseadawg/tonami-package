@@ -1,14 +1,14 @@
 export const ProjectList= [
-    "Peekapak"
+    // "Peekapak"
 ]
 
 export const HomePageSections= [
-    {
-        title: "about",
-        icon: "fa fa-user"
-    },
-    {
-        title: "projects",
-        icon: "fa fa-th"
-    }
+    // {
+    //     title: "about",
+    //     icon: "fa fa-user"
+    // },
+    // {
+    //     title: "projects",
+    //     icon: "fa fa-th"
+    // }
 ]
