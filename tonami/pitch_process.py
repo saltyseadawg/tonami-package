@@ -21,7 +21,7 @@ def get_voice_activity(pitch_contour, voiced_flag):
     Returns voiced frames with beginning and end silences removed.
 
     Args:
-        pitch_contour: time series of f0 returned from pitch extraction 
+        pitch_contour: time series of f0 returned from pitch extraction
             (ie. librosa.pyin)
         voiced_flag: time series of bools indicating voiced activity
     Returns:
@@ -50,7 +50,7 @@ def moving_average(signal, window_len: int = 5):
     Uses convolution to get rolling average with a window of window_len frames.
 
     Args:
-        signal (np.ndArray): time series to perform moving average on. most 
+        signal (np.ndArray): time series to perform moving average on. most
             likely pitch contour, amplitude, etc.
         window_len (int): number of frames, 5 by default
     Returns:
@@ -59,12 +59,12 @@ def moving_average(signal, window_len: int = 5):
     return uniform_filter1d(signal, size=window_len)
 
 
-def normalize_pitch(pitch_values, max_f0, min_f0):
+def normalize_pitch(pitch, max_f0, min_f0):
     """
     Normalize pitch values using typical method in literature.
 
     Args:
-        pitch_contour: time series of f0 returned from pitch extraction 
+        pitch_contour: time series of f0 returned from pitch extraction
             (ie. librosa.pyin)
         max_f0: speaker's expected upper limit on pitch
         min_f0: speaker's expected lower limit on pitch
@@ -72,14 +72,12 @@ def normalize_pitch(pitch_values, max_f0, min_f0):
         normalized: speaker's pitch contour mapped to a five point scale
     """
 
-    #Eqn. 7 from "A Comparison of Tone Normalization Methods..." by J. Zhang
-    normalized = []
-    for p in pitch_values:
-        normalized.append(
-            5
-            * (math.log(p, 10) - math.log(min_f0, 10))
-            / (math.log(max_f0, 10) - math.log(min_f0, 10))
-        )
+    # Eqn. 7 from "A Comparison of Tone Normalization Methods..." by J. Zhang
+    normalized = (
+        5
+        * (math.log(pitch, 10) - math.log(min_f0, 10))
+        / (math.log(max_f0, 10) - math.log(min_f0, 10))
+    )
     return normalized
 
 
@@ -116,7 +114,7 @@ def extract_amplitude(track, window_len):
     Finds the amplitude values of an audio track.
     *currently uses max amplitude per window of calculation
 
-    Using the word "frame" as typically used in MP3, and not in speech processing, as in 
+    Using the word "frame" as typically used in MP3, and not in speech processing, as in
     frame = the audio at a single time stamp
     window = series of frames
 
@@ -202,7 +200,7 @@ def median_filter(track):
 
 # %%
 
-#TODO: move this to jupyter notebook
+# TODO: move this to jupyter notebook
 
 # y1_f1, sr1_f1 = librosa.load("tone_perfect_all_mp3/a1_FV1_MP3.mp3")
 # y2_f1, sr2_f1 = librosa.load("tone_perfect_all_mp3/a2_FV1_MP3.mp3")
