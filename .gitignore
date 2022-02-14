@@ -1,5 +1,4 @@
-data/
-tone_perfect_all_mp3/
+*/tone_perfect/*
 *.png
 Pipfile
 
