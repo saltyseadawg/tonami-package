@@ -1,5 +1,6 @@
 # the line above is for jupyter notebook extension on VS code
 # TODO: in final, comment out matplotlib - we want to visualize everything in visualization module
+from locale import normalize
 import warnings
 import math
 
@@ -9,39 +10,93 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
+import pandas as pd
 
 # known error of package, we intend to use audioread.
 warnings.filterwarnings(
     "ignore", message="PySoundFile failed. Trying audioread instead."
 )
 
+PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
-def get_voice_activity(pitch_contour, voiced_flag):
+# VAD -> truncate -> check for nans (drop tracks with nans)
+# Segment -> divide into 3
+# Find mean pitch
+# Find differences between means
+# Final matrix (~9000,6 i.e. means, mean diffs)
+
+def basic_feature_extraction(pitch_contours):
+    truncated = []
+    for i in range(pitch_contours.shape[0]):
+        # truncated, but irregular
+        voiced = get_voice_activity(pitch_contours[i])
+        cast_arr = np.array(voiced, dtype=float)
+        truncated.append(cast_arr)
+
+    # drop all the nan rows - still irregular
+    valid = drop_invalid_pitch_contours(np.array(truncated, dtype=object))
+
+    features = np.empty((valid.shape[0],6))
+
+    # calcualte features - not irregular <3
+    for i in range(valid.shape[0]):
+        # normalizing and sh*t
+        avgd = moving_average(valid[i])
+        normalize_contour = lambda x: normalize_pitch(x, 300, 50)
+        # just want to apply function to every cell T_T
+        normalize_contour = np.vectorize(normalize_contour)
+        normalized = normalize_contour(avgd)
+
+        features[i] = basic_feat_calc(normalized)
+
+    return features
+    
+# https://www.isca-speech.org/archive_v0/archive_papers/interspeech_2010/i10_0602.pdf
+def basic_feat_calc(pitch_contour):
+    # pitch_contour is segmented
+    # voice activity detection
+
+    # Split into 3 bc the decision tree paper did it
+    segments = np.array_split(pitch_contour, 3)
+    features = np.empty(6)
+
+    # feats 0-2: segment means
+    for i in range(len(segments)):
+        features[i] = segments[i].mean()
+    
+    # feats 3-5: diff b/w means
+    features[3] = features[1] - features[0]
+    features[4] = features[2] - features[1]
+    features[5] = features[2] - features[0]
+
+    return features
+
+# https://note.nkmk.me/en/python-numpy-nan-remove/
+def drop_invalid_pitch_contours(contours):
+    # get rid of the rows with nans in the middle goddmanit
+    # 1. pad the goddamn array to do black magic (np only plays nice with array that are NOT irregular)
+    # 2. get the indices of pitch contours with nans in the middle
+    # 3. mask that shit
+    # 4. profit
+    padded = np.array(pad_matrix(contours, fillval='420.69'), dtype=float)
+    valid_row_mask = ~np.isnan(padded).any(axis=1)
+    return contours[valid_row_mask]
+
+def get_voice_activity(pitch_contour):
     """
     Returns voiced frames with beginning and end silences removed.
 
     Args:
         pitch_contour: time series of f0 returned from pitch extraction
             (ie. librosa.pyin)
-        voiced_flag: time series of bools indicating voiced activity
     Returns:
         pitch_contour: with beginning and end silences of utterance truncated
     """
-    # hacky method for now
-    # cannot deal with creaky voice atm
-    # beginning of list
-    start_voiced = 0
-    while not voiced_flag[start_voiced]:
-        start_voiced += 1
+    df = pd.DataFrame(pitch_contour, dtype='float64')
+    start_idx = df.first_valid_index()
+    end_idx = df.last_valid_index()
+    return pitch_contour[start_idx:end_idx]
 
-    end_voiced = len(voiced_flag) - 1
-    while not voiced_flag[end_voiced]:
-        end_voiced -= 1
-    voiced_flag[start_voiced:end_voiced] = True
-
-    # in numpy you can filter an array using a boolean index list
-    # https://www.w3schools.com/python/numpy/numpy_array_filter.asp#:~:text=In%20NumPy%2C%20you%20filter%20an,excluded%20from%20the%20filtered%20array.
-    return pitch_contour[voiced_flag]
 
 
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
@@ -193,6 +248,60 @@ def median_filter(track):
     pass
 
 
+# https://stackoverflow.com/questions/40569220/efficiently-convert-uneven-list-of-lists-to-minimal-containing-array-padded-with
+def pad_matrix(v, fillval=np.nan):
+    """Takes an irregular matrix and pads out each row to be equal in length.
+
+    Args:
+        v (np.array, list): a 2D matrix with rows of unequal length
+        fillvall: value to insert when padding
+
+    Returns:
+        np.array: a matrix with the same number of elements in each row
+    """
+    lens = np.array([len(item) for item in v])
+    mask = lens[:, None] > np.arange(lens.max())
+    out = np.full(mask.shape, fillval)
+    out[mask] = np.concatenate(v)
+    return out
+
+def end_to_end(data):
+    # 1. read in the data
+    # 2. stick into feature extraction of choice
+    # 3. classify
+    # 4. profit
+    # pitch_data = pd.read_json(PITCH_FILEPATH)
+    tone1 = data.loc[:, 'pitch_contour']
+    # print(tone1.to_numpy())
+    features = basic_feature_extraction(tone1.to_numpy())
+
+
+    tone1_counter = 0
+    for i in range(features.shape[0]):
+        # TONE 1
+        # if diffs aren't really that big == tone 1 babey
+        if features[i][3] <= 0.15 and features[i][4] <= 0.15 and features[i][5] <= 0.15:
+            tone1_counter += 1
+    
+    print(f'Total: {features.shape[0]}')
+    print(f'Correct: {tone1_counter}')
+    print(f'Wrong: {features.shape[0] - tone1_counter}')
+
+def ml_times():
+    pitch_data = pd.read_json(PITCH_FILEPATH)
+
+    # ALL THE FEMALE TONE PERFECT FILES
+    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
+    end_to_end(pitch_data)
+
+    # TONE 
+    for i in range(1,5):
+        tone = pitch_data.loc[pitch_data['tone'] == i]
+        print(f'TONE: {i}')
+        end_to_end(tone)
+        print('\n')
+
+
 # y is the amplitude of the waveform, sr is the sampling rate
 # y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
 # feature_vector = extract_feature_vector(y, 1024)
@@ -251,3 +360,4 @@ def median_filter(track):
 # plt.show()
 # plt.plot(amp_300)
 # plt.show()
+
