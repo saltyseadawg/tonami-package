@@ -11,6 +11,7 @@ import numpy as np
 from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
 import pandas as pd
+import sklearn
 
 # known error of package, we intend to use audioread.
 warnings.filterwarnings(
@@ -26,23 +27,13 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 # Final matrix (~9000,6 i.e. means, mean diffs)
 
 def basic_feature_extraction(pitch_contours):
-    truncated = []
-    for i in range(pitch_contours.shape[0]):
-        # truncated, but irregular
-        voiced = get_voice_activity(pitch_contours[i])
-        cast_arr = np.array(voiced, dtype=float)
-        truncated.append(cast_arr)
-
-    # drop all the nan rows - still irregular
-    valid = drop_invalid_pitch_contours(np.array(truncated, dtype=object))
-
-    features = np.empty((valid.shape[0],6))
+    features = np.empty((pitch_contours.shape[0],6))
 
     # calcualte features - not irregular <3
-    for i in range(valid.shape[0]):
+    for i in range(pitch_contours.shape[0]):
         # normalizing and sh*t
-        avgd = moving_average(valid[i])
-        normalize_contour = lambda x: normalize_pitch(x, 300, 50)
+        avgd = moving_average(pitch_contours[i])
+        normalize_contour = lambda x: normalize_pitch(x, 300, 50) #og 300 50
         # just want to apply function to every cell T_T
         normalize_contour = np.vectorize(normalize_contour)
         normalized = normalize_contour(avgd)
@@ -72,7 +63,7 @@ def basic_feat_calc(pitch_contour):
     return features
 
 # https://note.nkmk.me/en/python-numpy-nan-remove/
-def drop_invalid_pitch_contours(contours):
+def get_valid_mask(contours):
     # get rid of the rows with nans in the middle goddmanit
     # 1. pad the goddamn array to do black magic (np only plays nice with array that are NOT irregular)
     # 2. get the indices of pitch contours with nans in the middle
@@ -80,7 +71,7 @@ def drop_invalid_pitch_contours(contours):
     # 4. profit
     padded = np.array(pad_matrix(contours, fillval='420.69'), dtype=float)
     valid_row_mask = ~np.isnan(padded).any(axis=1)
-    return contours[valid_row_mask]
+    return valid_row_mask
 
 def get_voice_activity(pitch_contour):
     """
@@ -271,11 +262,26 @@ def end_to_end(data):
     # 3. classify
     # 4. profit
     # pitch_data = pd.read_json(PITCH_FILEPATH)
-    tone1 = data.loc[:, 'pitch_contour']
+    tone = data.loc[:, 'pitch_contour'].to_numpy()
+    label = data.loc[:, 'tone'].to_numpy()
     # print(tone1.to_numpy())
-    features = basic_feature_extraction(tone1.to_numpy())
 
+    truncated = []
+    for i in range(tone.shape[0]):
+        # truncated, but irregular
+        voiced = get_voice_activity(tone[i])
+        cast_arr = np.array(voiced, dtype=float)
+        truncated.append(cast_arr)
 
+    truncated_np = np.array(truncated, dtype=object)
+    # drop all the nan rows - still irregular
+    valid_mask = get_valid_mask(truncated_np)
+    data_valid = truncated_np[valid_mask]
+    label_valid = label[valid_mask]
+
+    features = basic_feature_extraction(data_valid)
+
+    #TODO: JANKY ASS FILLER, NEEDS TO BE CHANGED LOL
     tone1_counter = 0
     for i in range(features.shape[0]):
         # TONE 1
@@ -286,6 +292,8 @@ def end_to_end(data):
     print(f'Total: {features.shape[0]}')
     print(f'Correct: {tone1_counter}')
     print(f'Wrong: {features.shape[0] - tone1_counter}')
+
+    return label_valid, features
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
@@ -301,7 +309,60 @@ def ml_times():
         end_to_end(tone)
         print('\n')
 
+def svm_ml_times():
+    import sklearn.pipeline
+    pitch_data = pd.read_json(PITCH_FILEPATH)
 
+    # ALL THE FEMALE TONE PERFECT FILES
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
+    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2', 'MV3'])]
+    label, data = end_to_end(pitch_data)
+    
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.2)
+
+    clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto'))
+    clf.fit(X_train, y_train)
+
+    sklearn.pipeline.Pipeline(steps=[('standardscaler', sklearn.preprocessing.StandardScaler()),
+                ('svc', sklearn.svm.SVC(gamma='auto'))])
+
+    y_pred = clf.predict(X_test)
+    #TODO: labels might not be in the right order looooool could be 4 3 2 1?
+    img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
+    img.plot() #matplotlib magic hell
+    # plt.show()
+    plt.savefig("confusion.jpg")
+    # TONE 
+    # for i in range(1,5):
+        # tone = pitch_data.loc[pitch_data['tone'] == i]
+        # print(f'TONE: {i}')
+        # end_to_end(tone)
+        # print('\n')
+
+    
+
+
+
+def t_sne():
+    pitch_data = pd.read_json(PITCH_FILEPATH)
+
+    # ALL THE FEMALE TONE PERFECT FILES
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
+    # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2','MV3'])]
+    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV2','MV3'])]
+    label, data = end_to_end(pitch_data)
+
+    tsne = sklearn.manifold.TSNE(n_components=2)
+    tsne_result = tsne.fit_transform(data)
+    tsne_result.shape
+
+    fig, ax = plt.subplots()
+    for g in np.unique(label):
+        ix = np.where(label == g)
+        ax.scatter(tsne_result[ix, 0], tsne_result[ix, 1], label = g, s = 2)
+    ax.legend(bbox_to_anchor=(1, 1))
+    plt.savefig("tsne_only_male_voices.jpg") #save this
 # y is the amplitude of the waveform, sr is the sampling rate
 # y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
 # feature_vector = extract_feature_vector(y, 1024)
