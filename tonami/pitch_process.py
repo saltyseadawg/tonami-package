@@ -13,6 +13,7 @@ import scipy.signal as signal
 import pandas as pd
 import sklearn
 
+
 # known error of package, we intend to use audioread.
 warnings.filterwarnings(
     "ignore", message="PySoundFile failed. Trying audioread instead."
@@ -28,12 +29,15 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
 def basic_feature_extraction(pitch_contours):
     features = np.empty((pitch_contours.shape[0],6))
-
     # calcualte features - not irregular <3
+
+    flattened = np.hstack(pitch_contours)
+    pitch_max = np.percentile(flattened, 95)
+    pitch_min = np.percentile(flattened, 5)
     for i in range(pitch_contours.shape[0]):
         # normalizing and sh*t
         avgd = moving_average(pitch_contours[i])
-        normalize_contour = lambda x: normalize_pitch(x, 300, 50) #og 300 50
+        normalize_contour = lambda x: normalize_pitch(x, pitch_max, pitch_min) #og 300 50
         # just want to apply function to every cell T_T
         normalize_contour = np.vectorize(normalize_contour)
         normalized = normalize_contour(avgd)
@@ -88,8 +92,12 @@ def get_voice_activity(pitch_contour):
     end_idx = df.last_valid_index()
     return pitch_contour[start_idx:end_idx]
 
+# https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
+def interpolate_array():
+    # some method of interpolating array
+    pass
 
-
+# https://stackoverflow.com/questions/55207719/cant-understand-the-working-of-uniform-filter1d-function-imported-from-scipy'''
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
 def moving_average(signal, window_len: int = 5):
     """
@@ -282,16 +290,16 @@ def end_to_end(data):
     features = basic_feature_extraction(data_valid)
 
     #TODO: JANKY ASS FILLER, NEEDS TO BE CHANGED LOL
-    tone1_counter = 0
-    for i in range(features.shape[0]):
+    # tone1_counter = 0
+    # for i in range(features.shape[0]):
         # TONE 1
         # if diffs aren't really that big == tone 1 babey
-        if features[i][3] <= 0.15 and features[i][4] <= 0.15 and features[i][5] <= 0.15:
-            tone1_counter += 1
+        # if features[i][3] <= 0.15 and features[i][4] <= 0.15 and features[i][5] <= 0.15:
+        #     tone1_counter += 1
     
-    print(f'Total: {features.shape[0]}')
-    print(f'Correct: {tone1_counter}')
-    print(f'Wrong: {features.shape[0] - tone1_counter}')
+    # print(f'Total: {features.shape[0]}')
+    # print(f'Correct: {tone1_counter}')
+    # print(f'Wrong: {features.shape[0] - tone1_counter}')
 
     return label_valid, features
 
@@ -309,7 +317,7 @@ def ml_times():
         end_to_end(tone)
         print('\n')
 
-def svm_ml_times():
+def svm_ml_times(filename='confusion.jpg'):
     import sklearn.pipeline
     pitch_data = pd.read_json(PITCH_FILEPATH)
 
@@ -318,7 +326,7 @@ def svm_ml_times():
     pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2', 'MV3'])]
     label, data = end_to_end(pitch_data)
     
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.2)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.9)
 
     clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto'))
     clf.fit(X_train, y_train)
@@ -331,7 +339,7 @@ def svm_ml_times():
     img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
     img.plot() #matplotlib magic hell
     # plt.show()
-    plt.savefig("confusion.jpg")
+    plt.savefig(filename)
     # TONE 
     # for i in range(1,5):
         # tone = pitch_data.loc[pitch_data['tone'] == i]
@@ -343,15 +351,26 @@ def svm_ml_times():
 
 
 
-def t_sne():
+def t_sne(filename="t_sne.png"):
     pitch_data = pd.read_json(PITCH_FILEPATH)
-
+    speakers = ['FV1', 'FV2', 'FV3', 'MV2', 'MV3']
     # ALL THE FEMALE TONE PERFECT FILES
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
     # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2','MV3'])]
-    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV2','MV3'])]
-    label, data = end_to_end(pitch_data)
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV2','MV3'])]
+    feat_arrs = []
+    label_arrs = []
+
+    # normalize each speaker's pitch individually
+    for i in range(len(speakers)):
+        spkr_data = pitch_data.loc[pitch_data['speaker'] == speakers[i]]
+        spkr_label, spkr_feats, = end_to_end(spkr_data)
+        feat_arrs.append(spkr_feats)
+        label_arrs.append(spkr_label)
+
+    data = np.vstack(feat_arrs)
+    label = np.concatenate(label_arrs)
 
     tsne = sklearn.manifold.TSNE(n_components=2)
     tsne_result = tsne.fit_transform(data)
@@ -362,7 +381,7 @@ def t_sne():
         ix = np.where(label == g)
         ax.scatter(tsne_result[ix, 0], tsne_result[ix, 1], label = g, s = 2)
     ax.legend(bbox_to_anchor=(1, 1))
-    plt.savefig("tsne_only_male_voices.jpg") #save this
+    plt.savefig(filename) #save this
 # y is the amplitude of the waveform, sr is the sampling rate
 # y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
 # feature_vector = extract_feature_vector(y, 1024)
