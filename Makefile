@@ -1,4 +1,4 @@
-.PHONY: mount-files build-image push-image pull-image jupyter-server lint
+.PHONY: mount-files build-image push-image pull-image jupyter-server heroku-server lint
 
 IMAGE_NAME:=saltyseadawg/tonami-package
 IMAGE_VERSION:=latest
@@ -18,6 +18,10 @@ pull-image:
 
 jupyter-server:
 	docker run -it -p 8888:8888 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION)
+
+heroku-server:
+	docker run -it -p 8501:8501 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
+	"streamlit run heroku/tonami_interface.py"
 
 # code formatting
 # TODO: exclude jupyter notebook checkpoints, as they are auto saved versions of the file

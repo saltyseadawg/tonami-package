@@ -1,4 +1,7 @@
 # Packages required to run 
 librosa==0.8.1
 praat-parselmouth==0.4.0
-scikit-learn===1.0.2
+streamlit==1.5.0
+scikit-learn==1.0.2
+
+# heroku may need numpy to run, however adding it produces the error "Cannot install 'llvmlite'. It is a distutils installed project and thus we cannot accurately determine which files belong to it which would lead to only a partial uninstall."
