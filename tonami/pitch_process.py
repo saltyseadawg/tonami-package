@@ -30,7 +30,6 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 def basic_feature_extraction(pitch_contours):
     features = np.empty((pitch_contours.shape[0],6))
     # calcualte features - not irregular <3
-
     flattened = np.hstack(pitch_contours)
     pitch_max = np.percentile(flattened, 95)
     pitch_min = np.percentile(flattened, 5)
@@ -90,7 +89,12 @@ def get_voice_activity(pitch_contour):
     df = pd.DataFrame(pitch_contour, dtype='float64')
     start_idx = df.first_valid_index()
     end_idx = df.last_valid_index()
-    return pitch_contour[start_idx:end_idx]
+
+    voiced = pitch_contour
+    if not (start_idx is None and end_idx is None):
+        voiced = pitch_contour[start_idx:end_idx + 1]
+
+    return voiced
 
 # https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
 def interpolate_array():
@@ -323,7 +327,7 @@ def svm_ml_times(filename='confusion.jpg'):
 
     # ALL THE FEMALE TONE PERFECT FILES
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
-    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2', 'MV3'])]
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV1'])]
     label, data = end_to_end(pitch_data)
     
     X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.9)
@@ -357,7 +361,7 @@ def t_sne(filename="t_sne.png"):
     # ALL THE FEMALE TONE PERFECT FILES
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
     # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV2','MV3'])]
+    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV1', 'MV2','MV3'])]
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV2','MV3'])]
     feat_arrs = []
     label_arrs = []
