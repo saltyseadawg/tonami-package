@@ -7,36 +7,38 @@ from streamlit_bokeh_events import streamlit_bokeh_events
 from bokeh.io import curdoc
 from bokeh.plotting import figure, output_file, show
 
-def audio_btn():
-    stt_button = Button(label="Speak", width=100)
-
-    stt_button.js_on_event("button_click", CustomJS(code="""
-        var recognition = new webkitSpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-    
-        recognition.onresult = function (e) {
-            var value = "";
-            for (var i = e.resultIndex; i < e.results.length; ++i) {
-                if (e.results[i].isFinal) {
-                    value += e.results[i][0].transcript;
-                }
-            }
-            if ( value != "") {
-                document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
-            }
+def audio_btn():  
+    recording = False
+    stt_button = Button(label="Record", button_type="primary", id="stt_button")
+    stt_button.js_on_event("button_click", CustomJS(args=dict(btn=stt_button), code="""
+        if (btn.label == "Record") {
+            btn.label = "Stop"
+            btn.button_type = "danger"
+            document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: null}}));
+        } else {
+            btn.label = "Record"
+            btn.button_type = "primary"
+            document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: "url"}}));
         }
-        recognition.start();
-        """))
+        btn.change.emit()
+    """))
 
     result = streamlit_bokeh_events(
         stt_button,
-        events="GET_TEXT",
+        events="ON_RECORD",
         key="listen",
         refresh_on_update=False,
         override_height=75,
         debounce_time=0)
 
-    if result:
-        if "GET_TEXT" in result:
-            st.write(result.get("GET_TEXT"))
+    if result is not None:
+        st.write("here")
+        if "ON_RECORD" in result:
+            url = result.get("ON_RECORD")["url"]
+            if url is None:
+                st.write("none")
+            else:
+                st.write(url)
+
+    st.write(result)
+    st.write(recording)
