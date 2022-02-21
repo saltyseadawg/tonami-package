@@ -4,19 +4,34 @@ import numpy as np
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 
+from audio_btn import audio_btn
+
 import json
- 
+
+st.set_page_config(
+     page_title="Tonami",
+     page_icon="🧊",
+     initial_sidebar_state="collapsed"
+ )
+
 # Opening JSON file
 with open('heroku/interface_text.json') as json_file:
     data = json.load(json_file)
+    sidebar = data['sidebar']
+    options = sidebar['options']
 
     st.write(data['title'])
+    
+    # sidebar interface
+    st.sidebar.header(sidebar['header'])
+    option = st.sidebar.selectbox( sidebar['text'], options)
+    
+    key = options.index(option)
 
-st.sidebar.header('User Input Features :)')
-
-st.sidebar.markdown("""
-[Example CSV input file](https://raw.githubusercontent.com/dataprofessor/data/master/penguins_example.csv)
-""")
+    if key == 0:
+        st.write(data['instructions'])
+    else:
+        audio_btn()
 
 # # Collects user input features into dataframe
 # uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["csv"])
