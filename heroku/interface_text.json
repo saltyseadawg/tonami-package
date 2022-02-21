@@ -1,3 +1,14 @@
 {
-    "title": "# Penguin Prediction App \nThis app predicts the **Palmer Penguin** species! \n Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst."
+    "title": "# Tonami  \n This app predicts the **Palmer Penguin** species!  \n Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.",
+    "sidebar": {
+        "header": "User Testing Features",
+        "text": "Select option",
+        "options": [
+            "Alpaca",
+            "Buffalo",
+            "Camel",
+            "Dingo"
+        ]
+    },
+    "instructions": "Please wait for instructions from the interviewer"
 }
