@@ -8,11 +8,7 @@ from audio_btn import audio_btn
 
 import json
 
-st.set_page_config(
-     page_title="Tonami",
-     page_icon="🧊",
-     initial_sidebar_state="collapsed"
- )
+st.set_page_config( "Tonami", "🌊", "centered", "collapsed" )
 
 # Opening JSON file
 with open('heroku/interface_text.json') as json_file:
@@ -24,9 +20,11 @@ with open('heroku/interface_text.json') as json_file:
     
     # sidebar interface
     st.sidebar.header(sidebar['header'])
-    option = st.sidebar.selectbox( sidebar['text'], options)
+    option = st.sidebar.selectbox( sidebar['text'], options, 1)
     
     key = options.index(option)
+
+    st.write("Key: ", key, " Name: ", options[key])
 
     if key == 0:
         st.write(data['instructions'])

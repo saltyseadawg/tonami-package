@@ -4,10 +4,10 @@
         "header": "User Testing Features",
         "text": "Select option",
         "options": [
-            "Alpaca",
-            "Buffalo",
-            "Camel",
-            "Dingo"
+            "Alpaca 🦙",
+            "Boar 🐗",
+            "Camel 🐪",
+            "Dove 🕊️"
         ]
     },
     "instructions": "Please wait for instructions from the interviewer"
