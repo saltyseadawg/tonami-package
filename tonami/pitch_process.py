@@ -383,7 +383,18 @@ def svm_ml_times(filename='confusion.jpg'):
         # end_to_end(tone)
         # print('\n')
 
-    
+def visualize_interp():
+    pitch_data = pd.read_json(PITCH_FILEPATH)
+    pitch_data = pitch_data.loc[pitch_data['filename'].isin(['pi4_MV1_MP3.mp3'])]
+
+    #plot before and after interp
+    pitch_contour = pitch_data.loc[:, 'pitch_contour'].to_numpy()
+    interp_contour = interpolate_array(np.array(pitch_contour[0], dtype=float))
+
+    plt.plot(pitch_contour[0])
+    plt.plot(interp_contour, linestyle=":")
+    plt.savefig('interp.jpg')
+    #label = pitch_data.loc[:, 'tone'].to_numpy()
 
 
 
