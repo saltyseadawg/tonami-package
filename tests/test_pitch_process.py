@@ -40,3 +40,11 @@ def test_get_voice_activity():
     assert (pp.get_voice_activity(no_voice) == no_voice).all()
     assert (pp.get_voice_activity(truncate_voice) == truncate_voice_result).all()
 
+def test_interp():
+    arr = np.array([3,np.nan,4,np.nan,np.nan,7,10])
+    # arr = np.array([3,3.5,4,5,6,7,10]) #seems to break with this
+    result = np.array([3,3.5,4,5,6,7,10])
+    interp = pp.interpolate_array(arr)
+    assert (interp.shape == result.shape)
+    assert (interp == result).all()
+    #assert (arr == result).all()

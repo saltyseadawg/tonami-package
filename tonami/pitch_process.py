@@ -96,11 +96,39 @@ def get_voice_activity(pitch_contour):
 
     return voiced
 
-# https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
-def interpolate_array():
-    # some method of interpolating array
-    pass
+def get_nan_idx(arr):
+    """Helper to handle indices and logical indices of NaNs.
 
+    Input:
+        - arr, 1d numpy array with possible NaNs
+    Output:
+        - nans, logical indices of NaNs
+        - index, a function, with signature indices= index(logical_indices),
+          to convert logical indices of NaNs to 'equivalent' indices
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> nans, x= nan_helper(y)
+        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+    """
+    nans = np.isnan(arr)
+    index = lambda z: z.nonzero()[0]
+    return nans, index 
+
+# https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
+def interpolate_array(pitch_contour):
+
+    y= np.array(pitch_contour)
+
+    #should run after voiced activity chops the ends
+    if not (np.isnan(y[0]) and np.isnan(y[-1])):
+        #print(y)
+        #print(y.dtype)
+        nans, x= get_nan_idx(y)
+        y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+        # print(y[nans])
+        #print(y)
+    
+    return y
 # https://stackoverflow.com/questions/55207719/cant-understand-the-working-of-uniform-filter1d-function-imported-from-scipy'''
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
 def moving_average(signal, window_len: int = 5):
@@ -282,11 +310,15 @@ def end_to_end(data):
     for i in range(tone.shape[0]):
         # truncated, but irregular
         voiced = get_voice_activity(tone[i])
+        #TODO: interp pathway
         cast_arr = np.array(voiced, dtype=float)
-        truncated.append(cast_arr)
+        interp = interpolate_array(cast_arr)
+        # cast_arr = np.array(voiced, dtype=float)
+        truncated.append(interp)
 
     truncated_np = np.array(truncated, dtype=object)
     # drop all the nan rows - still irregular
+    # if interp runs, should only be dropping samples that are all nans
     valid_mask = get_valid_mask(truncated_np)
     data_valid = truncated_np[valid_mask]
     label_valid = label[valid_mask]
