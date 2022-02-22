@@ -1,4 +1,3 @@
-#%%
 import math
 import librosa
 import numpy as np
@@ -162,22 +161,3 @@ def tone_classification (algo, speaker):
     print('semi-correct: '+str(count[2]))
     print('incorrect: '+str(count[0]))
     pass
-
-#%%
-# TODO: move below somewhere else
-
-# tone_estimation(f0_1, f0_1)
-# tone_estimation(f0_2, f0_1)
-# tone_estimation(f0_3, f0_1)
-# tone_estimation(f0_4, f0_1)
-
-tone_classification('librosa', 'FV1')
-# tone_classification('librosa', 'FV2')
-# tone_classification('librosa', 'MV1')
-# tone_classification('librosa', 'MV2')
-
-# tone_classification('parselmouth', 'FV1')
-# tone_classification('parselmouth', 'FV2')
-# tone_classification('parselmouth', 'MV1')
-# tone_classification('parselmouth', 'MV2')
-# %%
