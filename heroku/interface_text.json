@@ -1,6 +1,8 @@
 {
     "title": "# Tonami",
     "instructions": "Please wait for instructions from the interviewer",
+    "calibration": "We'll need to calibrate our algorithmn to your voice. Please speak the follow section aloud:  \n One winter a Farmer found a Snake stiff and frozen with cold. He had compassion on it, and taking it up, placed it in his bosom. The Snake was quickly revived by the warmth, and resuming its natural instincts, bit its benefactor, inflicting on him a mortal wound. 'Oh,' cried the Farmer with his last breath, 'I am rightly served for pitying a scoundrel.'",
+    "calibration_end": "Thank you for patience. You may now proceed to the next module",
     "exercises": [
         {
             "character": "好玩",
