@@ -97,38 +97,52 @@ def get_voice_activity(pitch_contour):
     return voiced
 
 def get_nan_idx(arr):
-    """Helper to handle indices and logical indices of NaNs.
+    """
+    Helper to handle indices and logical indices of NaNs.
 
-    Input:
-        - arr, 1d numpy array with possible NaNs
-    Output:
-        - nans, logical indices of NaNs
-        - index, a function, with signature indices= index(logical_indices),
-          to convert logical indices of NaNs to 'equivalent' indices
+    Args:
+        arr: 1d numpy array with possible NaNs
+    Returns:
+        nans: logical indices of NaNs (an array of the same size as arr, 
+            which marks the location of NaNs with 1, and all others with 0)
+        index: a function that takes an array with 1s representing NaNs, 
+            and returns the indexes of nans
     Example:
         >>> # linear interpolation of NaNs
-        >>> nans, x= nan_helper(y)
-        >>> y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+        >>> arr = np.array([3,np.nan,4,np.nan,5)
+
+        >>> nans, index= nan_helper(arr)
+        >>> # nans would be [0, 1, 0, 1, 0]
+        >>> # index(nans) would return [1, 3]
+        >>> arr[nans]= np.interp(index(nans), index(~nans), arr[~nans])
     """
     nans = np.isnan(arr)
-    index = lambda z: z.nonzero()[0]
+    index = lambda z: z.nonzero()[0] #the [0] is to extract from tuple
     return nans, index 
 
 # https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
 def interpolate_array(pitch_contour):
+    """
+    Interpolates over NaN values (currently, only linearly)
+
+    Args:
+        pitch_contour: 1d numpy array with possible NaNs in the middle
+            must be dtype float, not object
+    Returns:
+        y: 1d numpy array
+    """
 
     y= np.array(pitch_contour)
 
-    #should run after voiced activity chops the ends
+    #should run after voiced activity chops the ends off
+    #so if there are nans at the ends, the entire file is nans
+    #just return them for now, will be dropped by valid mask
     if not (np.isnan(y[0]) and np.isnan(y[-1])):
-        #print(y)
-        #print(y.dtype)
         nans, x= get_nan_idx(y)
         y[nans]= np.interp(x(nans), x(~nans), y[~nans])
-        # print(y[nans])
-        #print(y)
     
     return y
+
 # https://stackoverflow.com/questions/55207719/cant-understand-the-working-of-uniform-filter1d-function-imported-from-scipy'''
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
 def moving_average(signal, window_len: int = 5):
@@ -382,21 +396,6 @@ def svm_ml_times(filename='confusion.jpg'):
         # print(f'TONE: {i}')
         # end_to_end(tone)
         # print('\n')
-
-def visualize_interp():
-    pitch_data = pd.read_json(PITCH_FILEPATH)
-    pitch_data = pitch_data.loc[pitch_data['filename'].isin(['pi4_MV1_MP3.mp3'])]
-
-    #plot before and after interp
-    pitch_contour = pitch_data.loc[:, 'pitch_contour'].to_numpy()
-    interp_contour = interpolate_array(np.array(pitch_contour[0], dtype=float))
-
-    plt.plot(pitch_contour[0])
-    plt.plot(interp_contour, linestyle=":")
-    plt.savefig('interp.jpg')
-    #label = pitch_data.loc[:, 'tone'].to_numpy()
-
-
 
 def t_sne(filename="t_sne.png"):
     pitch_data = pd.read_json(PITCH_FILEPATH)

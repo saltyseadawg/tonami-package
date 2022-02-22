@@ -42,9 +42,8 @@ def test_get_voice_activity():
 
 def test_interp():
     arr = np.array([3,np.nan,4,np.nan,np.nan,7,10])
-    # arr = np.array([3,3.5,4,5,6,7,10]) #seems to break with this
     result = np.array([3,3.5,4,5,6,7,10])
     interp = pp.interpolate_array(arr)
-    assert (interp.shape == result.shape)
+    assert (interp.shape == result.shape) 
+    # below throws hard to understand error if the arrays are not the same size
     assert (interp == result).all()
-    #assert (arr == result).all()
