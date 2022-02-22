@@ -1,3 +1,4 @@
+import collections
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,6 +8,19 @@ from sklearn.ensemble import RandomForestClassifier
 from audio_btn import audio_btn
 
 import json
+from datetime import datetime
+from bson.binary import Binary
+
+
+import pymongo
+
+USER = ''
+PWD = ''
+CONNECT_STRING = f'mongodb+srv://{USER}:{PWD}@cluster0.yxtrq.mongodb.net/audioDB?retryWrites=true&w=majority'
+
+if not hasattr(st, "client"):
+    st.client = pymongo.MongoClient(CONNECT_STRING)
+    st.collection = st.client.audio_files.user_test
 
 st.set_page_config( "Tonami", "🌊", "centered", "collapsed" )
 
@@ -27,15 +41,23 @@ if st.session_state.key == 0:
     st.write(data['instructions'])
 elif st.session_state.key == 1:
     st.write(data['calibration'])
-    st.session_state.url = audio_btn(5000)
+    st.session_state.url = audio_btn()
 
     if st.session_state.url is not None:
         st.write()
         temp = st.session_state.url.replace("blob:","")
         st.write(temp)
-        # audio_file = open(temp, 'rb')
-        # audio_bytes = audio_file.read()
-        # st.audio(temp,format="audio/mp3")
+        with open(temp, "rb") as f:
+            encoded = Binary(f.read())
+        st.collection.insert_one(
+            {
+                'date': datetime.now(),
+                'file': encoded
+            }
+        )
+        audio_file = open(temp, 'rb')
+        audio_bytes = audio_file.read()
+        st.audio(temp,format="audio/wav")
 else:
     exercise = exercises[st.session_state.key - 2]
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])

@@ -1,69 +1,94 @@
+from streamlit_webrtc import (
+    webrtc_streamer,
+    WebRtcMode,
+    WebRtcStreamerContext,
+)
 import streamlit as st
+from aiortc.contrib.media import MediaRecorder
+import soundfile as sf
+import numpy as np
+import matplotlib.pyplot as plt
+import streamlit as st
+import queue
+from pathlib import Path
+import time
+import pydub
 
-from bokeh.models.widgets import Button
-from bokeh.models import CustomJS
-from streamlit_bokeh_events import streamlit_bokeh_events
+# from streamlit_lottie import st_lottie
+import json
 
-from bokeh.io import curdoc
-from bokeh.plotting import figure, output_file, show
+TMP_DIR = Path('temp')
+if not TMP_DIR.exists():
+    TMP_DIR.mkdir(exist_ok=True, parents=True)
 
-def audio_btn(duration = 3000):
-    stt_button = Button(label="Record", button_type="primary", id="stt_button")
-    stt_button.js_on_event("button_click", CustomJS(args=dict(btn=stt_button, duration=duration), code="""
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia ({ audio: true })
+MEDIA_STREAM_CONSTRAINTS = {
+    "video": False,
+    "audio": {
+        # these setting doesn't work
+        # "sampleRate": 48000,
+        # "sampleSize": 16,
+        # "channelCount": 1,
+        "echoCancellation": False,  # don't turn on else it would reduce wav quality
+        "noiseSuppression": True,
+        "autoGainControl": True,
+    },
+}
 
-                // Success callback
-                .then(function(stream) {
-                    btn.label = "Recording in progress..."
-                    btn.button_type = "danger"
-                    btn.change.emit()
+# https://github.com/whitphx/streamlit-webrtc/issues/357
 
-                    const mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
+def save_frames_from_audio_receiver(wavpath):
+    webrtc_ctx = webrtc_streamer(
+        key="sendonly-audio",
+        mode=WebRtcMode.SENDONLY,
+        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
+    )
 
-                    const audioChunks = [];
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
+    if "audio_buffer" not in st.session_state:
+        st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-                    mediaRecorder.addEventListener("stop", () => {
-                        btn.label = "Record"
-                        btn.button_type = "primary"
-                        btn.change.emit()
+    status_indicator = st.empty()
+    lottie = False
+    while True:
+        if webrtc_ctx.audio_receiver:
+            try:
+                audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
+            except queue.Empty:
+                status_indicator.info("No frame arrived.")
+                continue
 
-                        const audioBlob = new Blob(audioChunks, {'type': 'audio/mp3'});
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        const audio = new Audio(audioUrl);
-                        document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: audioUrl}}));
-                    });
+            # if not lottie:  # voice gif
+            #     st_lottie(lottie_json, height=80)
+            #     lottie = True
 
-                    setTimeout(() => {
-                        mediaRecorder.stop();
-                    }, duration);
-                })
+            for i, audio_frame in enumerate(audio_frames):
+                sound = pydub.AudioSegment(
+                    data=audio_frame.to_ndarray().tobytes(),
+                    sample_width=audio_frame.format.bytes,
+                    frame_rate=audio_frame.sample_rate,
+                    channels=len(audio_frame.layout.channels),
+                )
+                # st.markdown(f'{len(audio_frame.layout.channels)}, {audio_frame.format.bytes}, {audio_frame.sample_rate}')
+                # 2, 2, 48000
+                st.session_state["audio_buffer"] += sound
+        else:
+            lottie = True
+            break
 
-                // Error callback
-                .catch(function(err) {
-                    console.log('The following getUserMedia error occurred: ' + err);
-                }
-            );
-        } else {
-            console.log('getUserMedia not supported on your browser!');
-        }
+    audio_buffer = st.session_state["audio_buffer"]
 
-        
-    """))
+    if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
+        audio_buffer.export(wavpath, format="wav")
+        st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-    result = streamlit_bokeh_events(
-        stt_button,
-        events="ON_RECORD",
-        key="listen",
-        refresh_on_update=False,
-        override_height=42,
-        debounce_time=0)
+def audio_btn():
+    st.markdown('# Recorder')
+    if "wavpath" not in st.session_state:
+        cur_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+        tmp_wavpath = TMP_DIR / f'{cur_time}.wav'
+        st.session_state["wavpath"] = str(tmp_wavpath)
 
-    if result is not None:
-        if "ON_RECORD" in result:
-            url = result.get("ON_RECORD")["url"]
-            return url
+    wavpath = st.session_state["wavpath"]
+
+    save_frames_from_audio_receiver(wavpath)  # second way
+
+    return wavpath
