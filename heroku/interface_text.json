@@ -1,14 +1,14 @@
 {
-    "title": "# Tonami  \n This app predicts the **Palmer Penguin** species!  \n Data obtained from the [palmerpenguins library](https://github.com/allisonhorst/palmerpenguins) in R by Allison Horst.",
-    "sidebar": {
-        "header": "User Testing Features",
-        "text": "Select option",
-        "options": [
-            "Alpaca 🦙",
-            "Boar 🐗",
-            "Camel 🐪",
-            "Dove 🕊️"
-        ]
-    },
-    "instructions": "Please wait for instructions from the interviewer"
+    "title": "# Tonami",
+    "instructions": "Please wait for instructions from the interviewer",
+    "exercises": [
+        {
+            "character": "好玩",
+            "fileName": "forvo_zh_好玩"
+        },
+        {
+            "character": "嚎",
+            "fileName": "pronunciation_zh_嚎"
+        }
+    ]
 }
