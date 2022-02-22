@@ -7,9 +7,9 @@ from streamlit_bokeh_events import streamlit_bokeh_events
 from bokeh.io import curdoc
 from bokeh.plotting import figure, output_file, show
 
-def audio_btn():
+def audio_btn(duration = 3000):
     stt_button = Button(label="Record", button_type="primary", id="stt_button")
-    stt_button.js_on_event("button_click", CustomJS(args=dict(btn=stt_button), code="""
+    stt_button.js_on_event("button_click", CustomJS(args=dict(btn=stt_button, duration=duration), code="""
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia ({ audio: true })
 
@@ -35,13 +35,12 @@ def audio_btn():
                         const audioBlob = new Blob(audioChunks, {'type': 'audio/mp3'});
                         const audioUrl = URL.createObjectURL(audioBlob);
                         const audio = new Audio(audioUrl);
-                        audio.play();
                         document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: audioUrl}}));
                     });
 
                     setTimeout(() => {
                         mediaRecorder.stop();
-                    }, 3000);
+                    }, duration);
                 })
 
                 // Error callback
