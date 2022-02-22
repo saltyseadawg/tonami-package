@@ -11,15 +11,14 @@ def audio_btn():
     stt_button = Button(label="Record", button_type="primary", id="stt_button")
     stt_button.js_on_event("button_click", CustomJS(args=dict(btn=stt_button), code="""
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            console.log('getUserMedia supported.');
-            navigator.mediaDevices.getUserMedia (
-                // constraints - only audio needed for this app
-                {
-                    audio: true
-                })
+            navigator.mediaDevices.getUserMedia ({ audio: true })
 
                 // Success callback
                 .then(function(stream) {
+                    btn.label = "Recording in progress..."
+                    btn.button_type = "danger"
+                    btn.change.emit()
+
                     const mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.start();
 
@@ -29,7 +28,11 @@ def audio_btn():
                     });
 
                     mediaRecorder.addEventListener("stop", () => {
-                        const audioBlob = new Blob(audioChunks);
+                        btn.label = "Record"
+                        btn.button_type = "primary"
+                        btn.change.emit()
+
+                        const audioBlob = new Blob(audioChunks, {'type': 'audio/mp3'});
                         const audioUrl = URL.createObjectURL(audioBlob);
                         const audio = new Audio(audioUrl);
                         audio.play();
@@ -46,16 +49,6 @@ def audio_btn():
                     console.log('The following getUserMedia error occurred: ' + err);
                 }
             );
-            if (btn.label == "Record") {
-                btn.label = "Stop"
-                btn.button_type = "danger"
-                // document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: null}}));
-            } else {
-                btn.label = "Record"
-                btn.button_type = "primary"
-                // document.dispatchEvent(new CustomEvent("ON_RECORD", {detail: {url: "url"}}));
-            }
-            btn.change.emit()
         } else {
             console.log('getUserMedia not supported on your browser!');
         }
@@ -68,16 +61,10 @@ def audio_btn():
         events="ON_RECORD",
         key="listen",
         refresh_on_update=False,
-        override_height=75,
+        override_height=42,
         debounce_time=0)
 
     if result is not None:
-        st.write("here")
         if "ON_RECORD" in result:
             url = result.get("ON_RECORD")["url"]
-            if url is None:
-                st.write("none")
-            else:
-                st.write(url)
-
-    st.write(result)
+            return url
