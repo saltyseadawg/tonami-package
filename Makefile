@@ -23,5 +23,14 @@ jupyter-server:
 # TODO: exclude jupyter notebook checkpoints, as they are auto saved versions of the file
 lint:
 	docker run -it  -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
-	"black tonami/ tests/ dev/ data_viz; \
+	"black tonami/ tests/ dev/ data_viz/; \
 	flake8 tonami/ tests/ dev/ data_viz/"
+
+# run inside container
+test:
+	python -m pytest tests/
+
+# run outside of container
+test-container:
+	docker run -it  -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
+	"python -m pytest tests/"
