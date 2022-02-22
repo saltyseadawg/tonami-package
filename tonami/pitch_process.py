@@ -1,4 +1,3 @@
-# the line above is for jupyter notebook extension on VS code
 # TODO: in final, comment out matplotlib - we want to visualize everything in visualization module
 from locale import normalize
 import warnings
@@ -191,6 +190,29 @@ def extract_amplitude(track, window_len):
         # Therefore, these windows are NOT overlapping.
         lower = frame * window_len
         upper = (frame + 1) * (window_len) - 1
+        
+        # Finding peak values and use the median value for amplitude contour 
+        # 
+        # test = track[lower:upper]
+        # test1, _ = signal.find_peaks(test)
+        # test2 = []
+        # for i in test1:
+        #     test2.append(test[i])
+        # # plt.plot(test2)
+        # test3, _ = signal.find_peaks(test2)
+        # test4 = []
+        # for i in test3:
+        #     test4.append(test2[i])
+        # # plt.plot(test4)
+        # # plt.show()
+        # AE.append(np.median(test4))
+
+        # Using root mean square
+        # 
+        # test = track[lower:upper]
+        # rms = np.sqrt(np.mean(test**2))
+        # AE.append(rms)
+
         # Find maximum of each window and add it to our array
         AE.append(np.max(track[lower:upper]))
     return np.array(AE)
@@ -390,58 +412,4 @@ def t_sne(filename="t_sne.png"):
 # y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
 # feature_vector = extract_feature_vector(y, 1024)
 # filter_noises(y)
-
-# %%
-
-# TODO: move this to jupyter notebook
-
-# y1_f1, sr1_f1 = librosa.load("tone_perfect_all_mp3/a1_FV1_MP3.mp3")
-# y2_f1, sr2_f1 = librosa.load("tone_perfect_all_mp3/a2_FV1_MP3.mp3")
-# y3_f1, sr3_f1 = librosa.load("tone_perfect_all_mp3/a3_FV1_MP3.mp3")
-# y4_f1, sr4_f1 = librosa.load("tone_perfect_all_mp3/a4_FV1_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.show()
-# plt.plot(y2_f1)
-# plt.show()
-# plt.plot(y3_f1)
-# plt.show()
-# plt.plot(y4_f1)
-# plt.show()
-
-# y1_f2, sr1_f2 = librosa.load("tone_perfect_all_mp3/a1_FV2_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.plot(y1_f2)
-# plt.show()
-
-# y1_f3, sr1_f3 = librosa.load("tone_perfect_all_mp3/a1_FV3_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.plot(y1_f2)
-# plt.plot(y1_f3)
-# plt.show()
-# # %%
-# amp_1024 = extract_amplitude(y1_f1, 1024)
-# amp_700 = extract_amplitude(y1_f1, 700)
-# amp_300 = extract_amplitude(y1_f1, 300)
-# plt.plot(y1_f1)
-# plt.show()
-
-# plt.plot(amp_1024)
-# plt.show()
-# plt.plot(amp_700)
-# plt.show()
-# plt.plot(amp_300)
-# plt.show()
-# # %%
-# amp_1024 = extract_amplitude(y3_f1, 1024)
-# amp_700 = extract_amplitude(y3_f1, 700)
-# amp_300 = extract_amplitude(y3_f1, 300)
-# plt.plot(y3_f1)
-# plt.show()
-
-# plt.plot(amp_1024)
-# plt.show()
-# plt.plot(amp_700)
-# plt.show()
-# plt.plot(amp_300)
-# plt.show()
 
