@@ -38,10 +38,7 @@ def basic_feature_extraction(pitch_contours):
     for i in range(pitch_contours.shape[0]):
         # normalizing and sh*t
         avgd = moving_average(pitch_contours[i])
-        normalize_contour = lambda x: normalize_pitch(x, pitch_max, pitch_min) #og 300 50
-        # just want to apply function to every cell T_T
-        normalize_contour = np.vectorize(normalize_contour)
-        normalized = normalize_contour(avgd)
+        normalized = normalize_pitch(avgd, pitch_max, pitch_min)
 
         features[i] = basic_feat_calc(normalized)
 
@@ -113,7 +110,7 @@ def get_nan_idx(arr: npt.NDArray[int]) -> Tuple[npt.NDArray[bool], Callable[[npt
         >>> # linear interpolation of NaNs
         >>> arr = np.array([3,np.nan,4,np.nan,5)
 
-        >>> nans, index= nan_helper(arr)
+        >>> nans, index= get_nan_idx(arr)
         >>> # nans would be [0, 1, 0, 1, 0]
         >>> # index(nans) would return [1, 3]
         >>> arr[nans]= np.interp(index(nans), index(~nans), arr[~nans])
@@ -174,12 +171,22 @@ def normalize_pitch(pitch, max_f0, min_f0):
         normalized: speaker's pitch contour mapped to a five point scale
     """
 
+    
+    pitch_arr = np.log10(pitch)
+    min_arr = np.full(pitch.shape, math.log(min_f0, 10))
+    max_arr = np.full(pitch.shape, math.log(max_f0, 10))
+
+    num = np.subtract(pitch_arr, min_arr)
+    den = np.subtract(max_arr, min_arr)
+
+    normalized = np.multiply(np.divide(num,den), 5)
+
     # Eqn. 7 from "A Comparison of Tone Normalization Methods..." by J. Zhang
-    normalized = (
-        5
-        * (math.log(pitch, 10) - math.log(min_f0, 10))
-        / (math.log(max_f0, 10) - math.log(min_f0, 10))
-    )
+    # normalized = (
+    #     5
+    #     * (math.log(pitch, 10) - math.log(min_f0, 10))
+    #     / (math.log(max_f0, 10) - math.log(min_f0, 10))
+    # )
     return normalized
 
 
