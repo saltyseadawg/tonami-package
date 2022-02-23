@@ -57,6 +57,7 @@ def save_frames_from_audio_receiver(wavpath):
             try:
                 audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
             except queue.Empty:
+                time.sleep(0.1)
                 status_indicator.info("No frame arrived.")
                 continue
 
