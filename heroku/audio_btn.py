@@ -37,10 +37,10 @@ MEDIA_STREAM_CONSTRAINTS = {
     },
 }
 
-# RTC_CONFIGURATION = RTCConfiguration(
-#     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+RTC_CONFIG = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun3.l.google.com:19302"]}]}
     
-# )
+)
 
 # https://github.com/whitphx/streamlit-webrtc/issues/357
 
@@ -49,7 +49,8 @@ def save_frames_from_audio_receiver(wavpath):
         key="sendonly-audio",
         mode=WebRtcMode.SENDONLY,
         audio_receiver_size=256,
-        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS
+        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
+        rtc_configuration=RTC_CONFIG
     )
 
     if "audio_buffer" not in st.session_state:
