@@ -5,7 +5,7 @@ streamlit==1.5.0
 scikit-learn==1.0.2
 bokeh==2.4.2
 streamlit_bokeh_events==0.1.2
-streamlit-webrtc==0.35.0 # record audio files
+streamlit-webrtc==0.31.1 # record audio files
 pymongo==4.0.1 # connect to mongodb
 dnspython==2.0.0
 pydub==0.25.1 # audio manipulation
