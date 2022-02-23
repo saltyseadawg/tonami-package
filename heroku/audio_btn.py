@@ -37,10 +37,6 @@ MEDIA_STREAM_CONSTRAINTS = {
     },
 }
 
-RTC_CONFIG = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun3.l.google.com:19302"]}]}
-    
-)
 
 # https://github.com/whitphx/streamlit-webrtc/issues/357
 
@@ -50,7 +46,8 @@ def save_frames_from_audio_receiver(wavpath):
         mode=WebRtcMode.SENDONLY,
         audio_receiver_size=256,
         media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
-        rtc_configuration=RTC_CONFIG
+        # COMMENT THIS OUT WHEN TESTING LOCALLY
+        rtc_configuration={"iceServers": [{"urls": ["stun:stun3.l.google.com:19302"]}]} # needed when hosting remotely
     )
 
     if "audio_buffer" not in st.session_state:
