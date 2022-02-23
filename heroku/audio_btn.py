@@ -15,6 +15,8 @@ import pydub
 
 # from streamlit_lottie import st_lottie
 import json
+import io
+
 
 TMP_DIR = Path('temp')
 if not TMP_DIR.exists():
@@ -45,8 +47,9 @@ def save_frames_from_audio_receiver(wavpath):
     webrtc_ctx = webrtc_streamer(
         key="sendonly-audio",
         mode=WebRtcMode.SENDONLY,
+        audio_receiver_size=256,
         media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
-        rtc_configuration=RTC_CONFIGURATION,
+        # rtc_configuration=RTC_CONFIGURATION,
     )
 
     if "audio_buffer" not in st.session_state:
@@ -87,7 +90,10 @@ def save_frames_from_audio_receiver(wavpath):
     audio_buffer = st.session_state["audio_buffer"]
 
     if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-        audio_buffer.export(wavpath, format="mp3")
+        # audio_buffer.export(wavpath, format="mp3")
+        buf = io.BytesIO()
+        audio_buffer.export(buf, format='mp3')
+        st.session_state.user_audio = buf.getvalue()
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
         return True
     return False
@@ -98,5 +104,5 @@ def audio_btn():
     tmp_wavpath = TMP_DIR / f'{cur_time}.mp3'
     audio_file = str(tmp_wavpath)
 
-    if audio_file and save_frames_from_audio_receiver(audio_file):  # second way
-        st.session_state['user_audio'] = audio_file
+    if audio_file:
+        save_frames_from_audio_receiver(audio_file)  # second way

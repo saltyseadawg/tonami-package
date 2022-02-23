@@ -38,17 +38,19 @@ st.write(data['title'])
 
 if st.session_state.key == 0:
     st.write(data['instructions'])
-    st.write(st.session_state.user_audio)
+    # st.write(st.session_state.user_audio)
 elif st.session_state.key == 1:
     st.write(data['calibration'])
-    st.write(st.session_state.user_audio)
+    # st.write(st.session_state.user_audio)
     audio_btn()
 
     if st.session_state.user_audio is not None:
-        st.write(st.session_state.user_audio)
+        # st.write(st.session_state.user_audio)
+        #TODO: extract pitch max/min
+        pass
 
 else:
-    st.write(st.session_state.user_audio)
+    # st.write(st.session_state.user_audio)
     exercise = exercises[st.session_state.key - 2]
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
 
@@ -59,13 +61,13 @@ else:
     audio_btn()
 
     if st.session_state.user_audio is not None:
-        with open(st.session_state.user_audio, "rb") as f:
-            encoded = Binary(f.read())
+        # with open(st.session_state.user_audio, "rb") as f:
+            # encoded = Binary(f.read())
         # we can only insert files < 16 MB into our db
         st.collection.insert_one(
             {
                 'date': datetime.now(),
-                'file': encoded
+                'file': st.session_state.user_audio
             }
         )
         st.audio(st.session_state.user_audio,format="audio/mp3")
