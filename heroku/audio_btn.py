@@ -4,8 +4,6 @@ from streamlit_webrtc import (
     WebRtcStreamerContext,
 )
 import streamlit as st
-from aiortc.contrib.media import MediaRecorder
-import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
