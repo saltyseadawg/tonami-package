@@ -8,3 +8,4 @@ class User:
 
     def get_pitch_profile(self) -> dict:
         return self.pitch_profile
+

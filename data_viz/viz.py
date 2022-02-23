@@ -23,7 +23,6 @@ def plot_pitch_contour(filename: str = 'wo3_MV2_MP3.mp3') -> None:
     plt.ylabel("Frequency (Hz)")
     plt.title(filename + " Pitch Contour")
 
-    #plot before and after interp
     pitch_contour = pitch_data.loc[:, 'pitch_contour'].to_numpy()
     plt.plot(pitch_contour[0])
     plt.savefig('tone_' + filename + ".jpg")
