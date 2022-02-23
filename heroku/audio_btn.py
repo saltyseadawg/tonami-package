@@ -21,6 +21,8 @@ TMP_DIR = Path('temp')
 if not TMP_DIR.exists():
     TMP_DIR.mkdir(exist_ok=True, parents=True)
 
+
+
 MEDIA_STREAM_CONSTRAINTS = {
     "video": False,
     "audio": {
@@ -47,9 +49,13 @@ def save_frames_from_audio_receiver(wavpath):
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
     status_indicator = st.empty()
+    # if not webrtc_ctx.state.playing:
+    #     st.write('AHHHH')
+    #     return False
     lottie = False
     while True:
-        if webrtc_ctx.audio_receiver:
+        # save audio AFTER user has clicked start
+        if webrtc_ctx.audio_receiver and webrtc_ctx.state.playing:
             try:
                 audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
             except queue.Empty:
@@ -77,18 +83,16 @@ def save_frames_from_audio_receiver(wavpath):
     audio_buffer = st.session_state["audio_buffer"]
 
     if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-        audio_buffer.export(wavpath, format="wav")
+        audio_buffer.export(wavpath, format="mp3")
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
+        return True
+    return False
 
 def audio_btn():
     st.markdown('# Recorder')
-    if "wavpath" not in st.session_state:
-        cur_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-        tmp_wavpath = TMP_DIR / f'{cur_time}.wav'
-        st.session_state["wavpath"] = str(tmp_wavpath)
+    cur_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+    tmp_wavpath = TMP_DIR / f'{cur_time}.mp3'
+    audio_file = str(tmp_wavpath)
 
-    wavpath = st.session_state["wavpath"]
-
-    save_frames_from_audio_receiver(wavpath)  # second way
-
-    return wavpath
+    if audio_file and save_frames_from_audio_receiver(audio_file):  # second way
+        st.session_state['user_audio'] = audio_file
