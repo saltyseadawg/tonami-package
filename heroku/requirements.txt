@@ -3,7 +3,7 @@ librosa==0.8.1
 praat-parselmouth==0.4.0
 streamlit==1.5.1
 scikit-learn==1.0.2
-streamlit-webrtc==0.31.1 # record audio files
+streamlit-webrtc==0.35.0 # record audio files
 pymongo==4.0.1 # connect to mongodb
 dnspython==2.0.0
 pydub==0.25.1 # audio manipulation
