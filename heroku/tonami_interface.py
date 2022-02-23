@@ -13,13 +13,9 @@ from bson.binary import Binary
 
 import pymongo
 
-USER = 'user'
-PWD = 'password'
-
-CONNECT_STRING = f'mongodb+srv://{USER}:{PWD}@cluster0.yxtrq.mongodb.net/audioDB?retryWrites=true&w=majority'
 
 if not hasattr(st, "client"):
-    st.client = pymongo.MongoClient(CONNECT_STRING)
+    st.client = pymongo.MongoClient(**st.secrets["mongo"])
     st.collection = st.client.audio_files.user_test
 
 st.set_page_config( "Tonami", "🌊", "centered", "collapsed" )
@@ -50,8 +46,6 @@ elif st.session_state.key == 1:
 
     if st.session_state.user_audio is not None:
         st.write(st.session_state.user_audio)
-        audio_file = open(st.session_state.user_audio, 'rb')
-        audio_bytes = audio_file.read()
 
 else:
     st.write(st.session_state.user_audio)
@@ -65,12 +59,7 @@ else:
     audio_btn()
 
     if st.session_state.user_audio is not None:
-        temp = st.session_state.user_audio
-        st.write(temp)
-        audio_file = open(temp, 'rb')
-        audio_bytes = audio_file.read()
-        st.audio(temp,format="audio/mp3")
-        with open(temp, "rb") as f:
+        with open(st.session_state.user_audio, "rb") as f:
             encoded = Binary(f.read())
         # we can only insert files < 16 MB into our db
         st.collection.insert_one(
@@ -79,9 +68,7 @@ else:
                 'file': encoded
             }
         )
-        audio_file = open(temp, 'rb')
-        audio_bytes = audio_file.read()
-        st.audio(temp,format="audio/wav")
+        st.audio(st.session_state.user_audio,format="audio/mp3")
 
 def on_next():
     st.session_state.key += 1
