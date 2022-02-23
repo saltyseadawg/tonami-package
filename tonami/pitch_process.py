@@ -8,6 +8,8 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
+from typing import Tuple, Callable
 from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
 import pandas as pd
@@ -96,10 +98,52 @@ def get_voice_activity(pitch_contour):
 
     return voiced
 
+def get_nan_idx(arr: npt.NDArray[int]) -> Tuple[npt.NDArray[bool], Callable[[npt.NDArray[bool]], npt.NDArray[int]]]:
+    """
+    Helper to handle indices and logical indices of NaNs.
+
+    Args:
+        arr (ndArray): 1d array with possible NaNs
+    Returns:
+        nans (ndArray): logical indices of NaNs (an array of the same size as arr, 
+            which marks the location of NaNs with 1, and all others with 0)
+        index (lambda): a function that takes an array with 1s representing NaNs, 
+            and returns the indexes of nans
+    Example:
+        >>> # linear interpolation of NaNs
+        >>> arr = np.array([3,np.nan,4,np.nan,5)
+
+        >>> nans, index= nan_helper(arr)
+        >>> # nans would be [0, 1, 0, 1, 0]
+        >>> # index(nans) would return [1, 3]
+        >>> arr[nans]= np.interp(index(nans), index(~nans), arr[~nans])
+    """
+    nans = np.isnan(arr)
+    index = lambda z: z.nonzero()[0] #the [0] is to extract from tuple
+    return nans, index 
+
 # https://stackoverflow.com/questions/6518811/interpolate-nan-values-in-a-numpy-array
-def interpolate_array():
-    # some method of interpolating array
-    pass
+def interpolate_array(pitch_contour):
+    """
+    Interpolates over NaN values (currently, only linearly)
+
+    Args:
+        pitch_contour: 1d numpy array with possible NaNs in the middle
+            must be dtype float, not object
+    Returns:
+        y: 1d numpy array
+    """
+
+    y= np.array(pitch_contour)
+
+    #should run after voiced activity chops the ends off
+    #so if there are nans at the ends, the entire file is nans
+    #just return them for now, will be dropped by valid mask
+    if not (np.isnan(y[0]) and np.isnan(y[-1])):
+        nans, x = get_nan_idx(y)
+        y[nans] = np.interp(x(nans), x(~nans), y[~nans])
+    
+    return y
 
 # https://stackoverflow.com/questions/55207719/cant-understand-the-working-of-uniform-filter1d-function-imported-from-scipy'''
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
@@ -282,11 +326,15 @@ def end_to_end(data):
     for i in range(tone.shape[0]):
         # truncated, but irregular
         voiced = get_voice_activity(tone[i])
+        #TODO: interp pathway
         cast_arr = np.array(voiced, dtype=float)
-        truncated.append(cast_arr)
+        interp = interpolate_array(cast_arr)
+        # cast_arr = np.array(voiced, dtype=float)
+        truncated.append(interp)
 
     truncated_np = np.array(truncated, dtype=object)
     # drop all the nan rows - still irregular
+    # if interp runs, should only be dropping samples that are all nans
     valid_mask = get_valid_mask(truncated_np)
     data_valid = truncated_np[valid_mask]
     label_valid = label[valid_mask]
@@ -340,6 +388,7 @@ def svm_ml_times(filename='confusion.jpg'):
 
     y_pred = clf.predict(X_test)
     #TODO: labels might not be in the right order looooool could be 4 3 2 1?
+    plt.figure()
     img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
     img.plot() #matplotlib magic hell
     # plt.show()
@@ -351,13 +400,9 @@ def svm_ml_times(filename='confusion.jpg'):
         # end_to_end(tone)
         # print('\n')
 
-    
-
-
-
 def t_sne(filename="t_sne.png"):
     pitch_data = pd.read_json(PITCH_FILEPATH)
-    speakers = ['FV1', 'FV2', 'FV3', 'MV2', 'MV3']
+    speakers = ['FV1', 'FV2', 'FV3', 'MV1', 'MV2', 'MV3']
     # ALL THE FEMALE TONE PERFECT FILES
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
     # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
@@ -380,6 +425,7 @@ def t_sne(filename="t_sne.png"):
     tsne_result = tsne.fit_transform(data)
     tsne_result.shape
 
+    plt.figure()
     fig, ax = plt.subplots()
     for g in np.unique(label):
         ix = np.where(label == g)
