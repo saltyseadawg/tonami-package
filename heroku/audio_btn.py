@@ -49,10 +49,7 @@ def save_frames_from_audio_receiver(wavpath):
         key="sendonly-audio",
         mode=WebRtcMode.SENDONLY,
         audio_receiver_size=256,
-        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
-        rtc_configuration={ # Add this line
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    }
+        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS
     )
 
     if "audio_buffer" not in st.session_state:
