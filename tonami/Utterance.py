@@ -2,6 +2,8 @@ import librosa
 import pandas as pd
 import numpy as np
 import numpy.typing as npt
+from typing import Tuple
+
 from tonami import pitch_process as pp
 # stub for utterance class
 # idea right now is that it creates an utterance that has gone through all
@@ -35,16 +37,19 @@ class Utterance:
             #TODO: code for getting the fmin and fmax
             #TODO: handle filename not found
         
+        #TODO: construct with just pitch_contour?
         else:
             print("attempted to create invalid Utterance")
 
-    def pre_process(self) -> npt.NDArray[float]:
+    def pre_process(self) -> Tuple[npt.NDArray[float], npt.NDArray[int]]:
         voiced = pp.get_voice_activity(self.pitch_contour)
         cast_arr = np.array(voiced, dtype=float)
+        nans, idx = pp.get_nan_idx(cast_arr)
+
         interp = pp.interpolate_array(cast_arr)
 
         self.pitch_contour = pp.moving_average(pp.normalize_pitch(interp, self.fmax, self.fmin))
 
-        return self.pitch_contour
+        return self.pitch_contour, nans #mask
         
 
