@@ -30,17 +30,17 @@ st.session_state['record'] = False
 
 # Opening JSON file
 with open('heroku/interface_text.json') as json_file:
-    data = json.load(json_file)
+    text = json.load(json_file)
 
-exercises = data["exercises"]
+exercises = text["exercises"]
 
-st.write(data['title'])
+st.write(text['title'])
 
 if st.session_state.key == 0:
-    st.write(data['instructions'])
+    st.write(text['instructions'])
     # st.write(st.session_state.user_audio)
 elif st.session_state.key == 1:
-    st.write(data['calibration'])
+    st.write(text['calibration'])
     # st.write(st.session_state.user_audio)
     audio_btn()
 

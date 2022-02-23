@@ -6,7 +6,9 @@ import librosa
 import parselmouth
 
 from .load_audio import load_audio_file
+from tonami import pitch_process as pp
 
+PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
 def parse_toneperfect_pitch(file_path, library):
     """Returns a dict containing metadata and pitch for a Tone Perfect file.
@@ -84,6 +86,36 @@ def write_toneperfect_pitch_data(
             "speaker": pd.Series(spkr),
             "sampling_rate": pd.Series(sample),
             "pitch_contour": pd.Series(pitch, dtype=object),
+        }
+    )
+    df.to_json(output)
+
+def save_speaker_max_min():
+    output="tonami/data/speaker_max_min.txt"
+
+    pitch_data = pd.read_json(PITCH_FILEPATH)
+    speakers = ['FV1', 'FV2', 'FV3', 'MV1', 'MV2', 'MV3']
+    spkr_max, spkr_min = [], []
+
+    for i in range(len(speakers)):
+        # Get raw tracks for each speaker        
+        spkr_data = pitch_data.loc[pitch_data['speaker'] == speakers[i]]
+
+        # Preprocessing
+        _, data_valid = pp.preproccess(spkr_data)
+
+        # Get min and max
+        max_f0, min_f0 = pp.max_min_f0(data_valid)
+
+        # Add to array
+        spkr_max.append(max_f0)
+        spkr_min.append(min_f0)
+    
+    df = pd.DataFrame(
+        {
+            "speaker_name": pd.Series(speakers),
+            "max_f0": pd.Series(spkr_max),
+            "min_f0": pd.Series(spkr_min),
         }
     )
     df.to_json(output)

@@ -32,9 +32,7 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 def basic_feature_extraction(pitch_contours):
     features = np.empty((pitch_contours.shape[0],6))
     # calcualte features - not irregular <3
-    flattened = np.hstack(pitch_contours)
-    pitch_max = np.percentile(flattened, 95)
-    pitch_min = np.percentile(flattened, 5)
+    pitch_max, pitch_min = max_min_f0(pitch_contours)
     for i in range(pitch_contours.shape[0]):
         # normalizing and sh*t
         avgd = moving_average(pitch_contours[i])
@@ -198,15 +196,13 @@ def max_min_f0(pitch_contours):
     Args:
         pitch_contours: List of pitch contours from a speaker.
     Returns:
-        max_f0: speaker's upper limit on pitch
-        min_f0: speaker's lower limit on pitch
+        pitch_max: speaker's upper limit on pitch
+        pitch_min: speaker's lower limit on pitch
     """
-    # fudge this for now until we get the speaker data hooked up
-    max_f0, min_f0 = 0, 1000
-    for contour in pitch_contours:
-        max_f0 = max(max_f0, max(contour))
-        min_f0 = min(min_f0, min(contour))
-    return max_f0, min_f0
+    flattened = np.hstack(pitch_contours)
+    pitch_max = np.percentile(flattened, 95)
+    pitch_min = np.percentile(flattened, 5)
+    return pitch_max, pitch_min
 
 
 def extract_feature_vector(track, window_len):
@@ -319,11 +315,7 @@ def pad_matrix(v, fillval=np.nan):
     out[mask] = np.concatenate(v)
     return out
 
-def end_to_end(data):
-    # 1. read in the data
-    # 2. stick into feature extraction of choice
-    # 3. classify
-    # 4. profit
+def preproccess(data):
     # pitch_data = pd.read_json(PITCH_FILEPATH)
     tone = data.loc[:, 'pitch_contour'].to_numpy()
     label = data.loc[:, 'tone'].to_numpy()
@@ -345,6 +337,16 @@ def end_to_end(data):
     valid_mask = get_valid_mask(truncated_np)
     data_valid = truncated_np[valid_mask]
     label_valid = label[valid_mask]
+
+    return label_valid, data_valid
+
+def end_to_end(data):
+    # 1. read in the data
+    # 2. stick into feature extraction of choice
+    # 3. classify
+    # 4. profit
+
+    label_valid, data_valid = preproccess(data)
 
     features = basic_feature_extraction(data_valid)
 
