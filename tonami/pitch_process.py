@@ -8,6 +8,8 @@ import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
+from typing import Tuple, Callable
 from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
 import pandas as pd
@@ -96,16 +98,16 @@ def get_voice_activity(pitch_contour):
 
     return voiced
 
-def get_nan_idx(arr):
+def get_nan_idx(arr: npt.NDArray[int]) -> Tuple[npt.NDArray[bool], Callable[[npt.NDArray[bool]], npt.NDArray[int]]]:
     """
     Helper to handle indices and logical indices of NaNs.
 
     Args:
-        arr: 1d numpy array with possible NaNs
+        arr (ndArray): 1d array with possible NaNs
     Returns:
-        nans: logical indices of NaNs (an array of the same size as arr, 
+        nans (ndArray): logical indices of NaNs (an array of the same size as arr, 
             which marks the location of NaNs with 1, and all others with 0)
-        index: a function that takes an array with 1s representing NaNs, 
+        index (lambda): a function that takes an array with 1s representing NaNs, 
             and returns the indexes of nans
     Example:
         >>> # linear interpolation of NaNs
@@ -138,8 +140,8 @@ def interpolate_array(pitch_contour):
     #so if there are nans at the ends, the entire file is nans
     #just return them for now, will be dropped by valid mask
     if not (np.isnan(y[0]) and np.isnan(y[-1])):
-        nans, x= get_nan_idx(y)
-        y[nans]= np.interp(x(nans), x(~nans), y[~nans])
+        nans, x = get_nan_idx(y)
+        y[nans] = np.interp(x(nans), x(~nans), y[~nans])
     
     return y
 
@@ -386,6 +388,7 @@ def svm_ml_times(filename='confusion.jpg'):
 
     y_pred = clf.predict(X_test)
     #TODO: labels might not be in the right order looooool could be 4 3 2 1?
+    plt.figure()
     img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
     img.plot() #matplotlib magic hell
     # plt.show()
@@ -399,7 +402,7 @@ def svm_ml_times(filename='confusion.jpg'):
 
 def t_sne(filename="t_sne.png"):
     pitch_data = pd.read_json(PITCH_FILEPATH)
-    speakers = ['FV1', 'FV2', 'FV3', 'MV2', 'MV3']
+    speakers = ['FV1', 'FV2', 'FV3', 'MV1', 'MV2', 'MV3']
     # ALL THE FEMALE TONE PERFECT FILES
     # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
     # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
@@ -422,6 +425,7 @@ def t_sne(filename="t_sne.png"):
     tsne_result = tsne.fit_transform(data)
     tsne_result.shape
 
+    plt.figure()
     fig, ax = plt.subplots()
     for g in np.unique(label):
         ix = np.where(label == g)
