@@ -2,6 +2,7 @@ from streamlit_webrtc import (
     webrtc_streamer,
     WebRtcMode,
     WebRtcStreamerContext,
+    RTCConfiguration,
 )
 import streamlit as st
 import numpy as np
@@ -34,6 +35,10 @@ MEDIA_STREAM_CONSTRAINTS = {
     },
 }
 
+RTC_CONFIGURATION = RTCConfiguration(
+    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+)
+
 # https://github.com/whitphx/streamlit-webrtc/issues/357
 
 def save_frames_from_audio_receiver(wavpath):
@@ -41,6 +46,7 @@ def save_frames_from_audio_receiver(wavpath):
         key="sendonly-audio",
         mode=WebRtcMode.SENDONLY,
         media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
+        rtc_configuration=RTC_CONFIGURATION,
     )
 
     if "audio_buffer" not in st.session_state:
@@ -57,7 +63,6 @@ def save_frames_from_audio_receiver(wavpath):
             try:
                 audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
             except queue.Empty:
-                time.sleep(0.1)
                 status_indicator.info("No frame arrived.")
                 continue
 
