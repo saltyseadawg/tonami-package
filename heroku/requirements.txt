@@ -9,5 +9,7 @@ streamlit-webrtc==0.35.0 # record audio files
 pymongo==4.0.1 # connect to mongodb
 dnspython==2.0.0
 pydub==0.25.1 # audio manipulation
+matplotlib==3.5.1
+
 
 # heroku may need numpy to run, however adding it produces the error "Cannot install 'llvmlite'. It is a distutils installed project and thus we cannot accurately determine which files belong to it which would lead to only a partial uninstall."
