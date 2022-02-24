@@ -323,9 +323,10 @@ def preprocess(pitch_contour):
     voiced = get_voice_activity(pitch_contour)
     #TODO: interp pathway
     cast_arr = np.array(voiced, dtype=float)
+    nans, idx = get_nan_idx(cast_arr)
     interp = interpolate_array(cast_arr)
         # cast_arr = np.array(voiced, dtype=float)
-    return interp
+    return interp, nans
 
 def preprocess_all(data):
     # pitch_data = pd.read_json(PITCH_FILEPATH)
@@ -335,7 +336,8 @@ def preprocess_all(data):
 
     truncated = []
     for i in range(tone.shape[0]):
-        truncated.append(preprocess(tone[i]))
+        pitch_contour, _ = preprocess(tone[i])
+        truncated.append(pitch_contour)
 
     truncated_np = np.array(truncated, dtype=object)
     # drop all the nan rows - still irregular

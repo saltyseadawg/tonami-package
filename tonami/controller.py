@@ -8,6 +8,7 @@ import librosa
 import pitch_process as pp
 import Utterance as u
 import user
+import Classifier as c
 # functions that are called by the front-end to get plots, rating feedback, etc.
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
@@ -44,27 +45,24 @@ def load_exercise(filename: str = 'wo3_MV2_MP3.mp3') -> None:
 
 def send_data_to_frontend(user_info: dict[user.User], track: npt.NDArray[float]=None, tone: int=None):
     """
-    Takes the user's info, user's trial, native speaker's plot and the desired tone/word
+    Takes the user's info, user's track and the desired tone/word
 
     Args:
-        user_recording (str): filename of tone to be plotted
+        user_info (Class User): user information to obtain f0 min and max values
+        track (np.array): audio time series to be filtered
+        tone (int): integer tone value (i.e. 1, 2, 3 or 4)
     """
 
     user_utterance = u.Utterance(track)
     user_pitch_contour, user_nans, features = user_utterance.pre_process(user_info)
     
-    # TODO: move this to Classifier.py
-    # prediction = clf.predict(features)
+    classifier = c.Classifier(4, 'svm')
+    classified_tones = classifier.classify_tones(features)
 
-    # plt.plot(plot_native_speaker)
+    # plt.figure()
     # plt.plot(user_pitch_contour)
     # plt.show()
-    # plt.savefig('../../../compare_tone_' + tone + ".jpg")
+    # plt.savefig('compare_tone_' + tone + ".jpg")
 
     # use user_pitch_contour to plot graphs in frontend
-    return user_pitch_contour #, prediction
-
-y1_f1, sr1_f1 = librosa.load("../data/tone_perfect/a1_FV1_MP3.mp3")
-fig, ax = plt.subplots()
-ax.plot(y1_f1)
-test = send_data_to_frontend(user.User(500, 50), y1_f1, 1)
+    return user_pitch_contour, classified_tones

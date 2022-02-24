@@ -12,7 +12,7 @@ def get_user_from_calibration(user_audio):
     samples = user_audio.get_array_of_samples()
     arr = np.array(samples).astype(np.float32)
     pitch_contour, _, _ = librosa.pyin(arr, fmin=100, fmax=300)
-    pitch_contour = pp.preprocess(pitch_contour)
+    pitch_contour, _ = pp.preprocess(pitch_contour)
     max_f0, min_f0 = pp.max_min_f0(pitch_contour)
     user = usr.User(max_f0, min_f0)
     return user

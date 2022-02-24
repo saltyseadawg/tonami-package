@@ -54,11 +54,9 @@ class Utterance:
         """Prepares the audio track for classification and visualization.
         """
         interp = pp.preprocess(self.pitch_contour)
-        interp_np = np.array([interp], dtype=object)
+        interp_np = np.array([interp], dtype=float)
         valid_mask = pp.get_valid_mask(interp_np)
         data_valid = interp_np[valid_mask]
-
-        # TODO: getting an error, need to fix this
         features = pp.basic_feature_extraction(data_valid)
         profile = user.get_pitch_profile
         self.pitch_contour = pp.moving_average(pp.normalize_pitch(interp, profile['max_f0'], profile['max_f0']))
