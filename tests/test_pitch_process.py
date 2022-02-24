@@ -22,7 +22,7 @@ def test_normalize_pitch():
     assert (normalized == approx(result, abs=1e-10))
 
 def test_pad_matrix():
-    arr = np.array([[], [1], [1,2,], [1,2,3,4]], dtype=object)
+    arr = np.array([np.array([]), np.array([1]), np.array([1,2]), np.array([1,2,3,4])], dtype=object)
     result = np.array([[0,0,0,0],[1,0,0,0], [1,2,0,0], [1,2,3,4]])
     assert (pp.pad_matrix(arr, 0) == result).all()
 

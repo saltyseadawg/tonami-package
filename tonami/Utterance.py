@@ -53,14 +53,18 @@ class Utterance:
     def pre_process(self, user) -> Tuple[npt.NDArray[float], npt.NDArray[bool], npt.NDArray[float]]:
         """Prepares the audio track for classification and visualization.
         """
-        interp = pp.preprocess(self.pitch_contour)
+        interp, nans = pp.preprocess(self.pitch_contour)
         interp_np = np.array([interp], dtype=float)
-        valid_mask = pp.get_valid_mask(interp_np)
-        data_valid = interp_np[valid_mask]
-        features = pp.basic_feature_extraction(data_valid)
-        profile = user.get_pitch_profile
-        self.pitch_contour = pp.moving_average(pp.normalize_pitch(interp, profile['max_f0'], profile['max_f0']))
+        # valid_mask = pp.get_valid_mask(interp_np)
+        # data_valid = interp_np[valid_mask]
+        # features = pp.basic_feature_extraction(interp_np)
+        profile = user.get_pitch_profile()
+        
+        avgd = pp.moving_average(interp_np)
+        normalized_pitch = pp.normalize_pitch(avgd, profile['max_f0'], profile['min_f0'])
+        features = pp.basic_feat_calc(normalized_pitch)
+        self.normalized_pitch = normalized_pitch
 
-        return self.pitch_contour, nans, features #nans - mask
+        return normalized_pitch, nans, features #nans - mask
         
 
