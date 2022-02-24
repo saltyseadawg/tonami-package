@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 import librosa
 import parselmouth
+import pickle
+# import sklearn
+# import sklearn.pipeline
 
 from .load_audio import load_audio_file
 from tonami import pitch_process as pp
@@ -91,6 +94,10 @@ def write_toneperfect_pitch_data(
     df.to_json(output)
 
 def save_speaker_max_min():
+    """Creates a json file containing max and min f0 frequencies from the 
+    6 test speakers from Tone Perfect Database.
+    """
+
     output="tonami/data/speaker_max_min.txt"
 
     pitch_data = pd.read_json(PITCH_FILEPATH)
@@ -102,7 +109,7 @@ def save_speaker_max_min():
         spkr_data = pitch_data.loc[pitch_data['speaker'] == speakers[i]]
 
         # Preprocessing
-        _, data_valid = pp.preproccess(spkr_data)
+        _, data_valid = pp.preprocess_all(spkr_data)
 
         # Get min and max
         max_f0, min_f0 = pp.max_min_f0(data_valid)
@@ -119,3 +126,19 @@ def save_speaker_max_min():
         }
     )
     df.to_json(output)
+
+def save_classifier_data(
+    clf,
+    name = "svm_80"
+):
+    file_name = "tonami/data/pickled_" + name + ".pkl"
+
+    # pitch_data = pd.read_json(PITCH_FILEPATH)
+    # label, data = pp.end_to_end(pitch_data)
+    
+    # X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.9)
+
+    # clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto'))
+    # clf.fit(X_train, y_train)
+
+    pickle.dump(clf, open(file_name, 'wb'))

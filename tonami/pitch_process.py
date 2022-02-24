@@ -315,7 +315,16 @@ def pad_matrix(v, fillval=np.nan):
     out[mask] = np.concatenate(v)
     return out
 
-def preproccess(data):
+def preprocess(pitch_contour):
+    # truncated, but irregular
+    voiced = get_voice_activity(pitch_contour)
+    #TODO: interp pathway
+    cast_arr = np.array(voiced, dtype=float)
+    interp = interpolate_array(cast_arr)
+        # cast_arr = np.array(voiced, dtype=float)
+    return interp
+
+def preprocess_all(data):
     # pitch_data = pd.read_json(PITCH_FILEPATH)
     tone = data.loc[:, 'pitch_contour'].to_numpy()
     label = data.loc[:, 'tone'].to_numpy()
@@ -323,13 +332,7 @@ def preproccess(data):
 
     truncated = []
     for i in range(tone.shape[0]):
-        # truncated, but irregular
-        voiced = get_voice_activity(tone[i])
-        #TODO: interp pathway
-        cast_arr = np.array(voiced, dtype=float)
-        interp = interpolate_array(cast_arr)
-        # cast_arr = np.array(voiced, dtype=float)
-        truncated.append(interp)
+        truncated.append(preprocess(tone[i]))
 
     truncated_np = np.array(truncated, dtype=object)
     # drop all the nan rows - still irregular
@@ -346,7 +349,7 @@ def end_to_end(data):
     # 3. classify
     # 4. profit
 
-    label_valid, data_valid = preproccess(data)
+    label_valid, data_valid = preprocess_all(data)
 
     features = basic_feature_extraction(data_valid)
 

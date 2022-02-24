@@ -42,11 +42,7 @@ class Utterance:
             print("attempted to create invalid Utterance")
 
     def pre_process(self) -> Tuple[npt.NDArray[float], npt.NDArray[int]]:
-        voiced = pp.get_voice_activity(self.pitch_contour)
-        cast_arr = np.array(voiced, dtype=float)
-        nans, idx = pp.get_nan_idx(cast_arr)
-
-        interp = pp.interpolate_array(cast_arr)
+        interp = pp.preprocess(self.pitch_contour)
 
         self.pitch_contour = pp.moving_average(pp.normalize_pitch(interp, self.fmax, self.fmin))
 
