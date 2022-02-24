@@ -199,9 +199,12 @@ def max_min_f0(pitch_contours):
         pitch_max: speaker's upper limit on pitch
         pitch_min: speaker's lower limit on pitch
     """
-    flattened = np.hstack(pitch_contours)
-    pitch_max = np.percentile(flattened, 95)
-    pitch_min = np.percentile(flattened, 5)
+    flattened = pitch_contours
+    if pitch_contours.ndim > 1:
+        # turn into 1D array
+        flattened = np.hstack(pitch_contours)
+    pitch_max = np.nanpercentile(flattened, 95)
+    pitch_min = np.nanpercentile(flattened, 5)
     return pitch_max, pitch_min
 
 

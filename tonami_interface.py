@@ -16,13 +16,13 @@ from heroku import audio_btn
 from tonami import Utterance as utt
 from tonami import pitch_process as pp
 from tonami import user as usr
-from tonami import calibration as c
 
+import io
 import json
 from datetime import datetime
-from bson.binary import Binary
 
 import pymongo
+from tonami.audio_utils import convert_audio
 
 
 if not hasattr(st, "client"):
@@ -41,7 +41,6 @@ if 'user' not in st.session_state:
     st.session_state.user = None
 
 st.session_state.user_audio = None
-st.session_state['record'] = False
 
 # Opening JSON file
 with open('heroku/interface_text.json') as json_file:
@@ -62,44 +61,38 @@ elif st.session_state.key == 1:
     if st.session_state.user_audio is not None:
         # st.write(st.session_state.user_audio)
         #TODO: extract pitch max/min
-        # a = np.frombuffer(st.session_state.user_audio, dtype=float)
-        # sound = AudioSegment.from_file(io.BytesIO(st.session_state.user_audio))
-        # sound = AudioSegment.from_file("data/Kanta.mp3")
-        # samples = sound.get_array_of_samples()
-        # arr = np.array(samples).astype(np.float32)
-        # a_p = np.array(sound.get_array_of_samples(), dtype=np.int16)
-        # a_p = a_p.astype(float)
-        # st.write(type(arr))
-        # st.write(a_p)
-        st.session_state.user = c.get_user_from_calibration(st.session_state.user_audio)
+
+        st.session_state.user = usr.User(audio=st.session_state.user_audio)
         p = st.session_state.user.pitch_profile
         st.write(p["max_f0"], p["min_f0"])
-        pass
 
 else:
     # st.write(st.session_state.user_audio)
     exercise = exercises[st.session_state.key - 2]
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
-
-    audio_btn.audio_file = open("data/" + exercise["fileName"] + ".mp3", 'rb')
-    audio_bytes = audio_file.read()
+    
+    with open("data/" + exercise["fileName"] + ".mp3", 'rb') as f:
+        audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
-    audio_btn()
+    audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
+        user_bytes = convert_audio(st.session_state.user_audio, 'wav').getvalue()
         # with open(st.session_state.user_audio, "rb") as f:
             # encoded = Binary(f.read())
         # we can only insert files < 16 MB into our db
-        st.collection.insert_one(
-            {
-                'date': datetime.now(),
-                'file': st.session_state.user_audio
-            }
-        )
-        st.audio(st.session_state.user_audio,format="audio/mp3")
-
-        # utterance = Utterance(st.session_state.user_audio, None, )
+        # st.collection.insert_one(
+        #     {
+        #         'date': datetime.now(),
+        #         'file': user_bytes
+        #     }
+        # )
+        st.audio(user_bytes,format="audio/wav")
+        p = st.session_state.user.pitch_profile
+        utter = utt.Utterance(st.session_state.user_audio)
+        utter.pre_process(p["max_f0"], p["min_f0"])
+        st.write(utter.pitch_contour)
 
         # load_clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
 

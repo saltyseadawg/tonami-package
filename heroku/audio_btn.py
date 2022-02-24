@@ -15,7 +15,6 @@ import pydub
 
 # from streamlit_lottie import st_lottie
 import json
-import io
 
 
 TMP_DIR = Path('temp')
@@ -54,9 +53,6 @@ def save_frames_from_audio_receiver(wavpath):
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
     status_indicator = st.empty()
-    # if not webrtc_ctx.state.playing:
-    #     st.write('AHHHH')
-    #     return False
     lottie = False
     while True:
         # save audio AFTER user has clicked start
@@ -88,10 +84,6 @@ def save_frames_from_audio_receiver(wavpath):
     audio_buffer = st.session_state["audio_buffer"]
 
     if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-        # audio_buffer.export(wavpath, format="mp3")
-        buf = io.BytesIO()
-        # temp_path = "calibration_test.wav"
-        audio_buffer.export(buf, format='mp3')
         st.session_state.user_audio = audio_buffer
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
         return True
