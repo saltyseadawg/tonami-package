@@ -22,6 +22,7 @@ class Utterance:
             #we might want to just pass the pitch contour and stuff in directly as constructor? unsure
             #depends on how rest of code is written i guess
             self.pitch_contour, self.voiced_flag, self.voiced_prob = librosa.pyin(track, pitch_floor, pitch_ceil)
+            self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
 
         # if track is an 
         elif isinstance(track, AudioSegment):
@@ -31,6 +32,7 @@ class Utterance:
 
             # need to figure out how to adjust the floor and ceiling
             self.pitch_contour, self.voiced_flag, self.voiced_prob = librosa.pyin(y, fmin=pitch_floor, fmax=pitch_ceil)
+            self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
 
         elif filename != None:
             self.PITCH_FILEPATH = pitch_filepath
@@ -41,10 +43,10 @@ class Utterance:
             self.pitch_contour = np.array(self.pitch_data.loc[:, 'pitch_contour'].to_numpy()[0], dtype=float)
             self.label = self.pitch_data.loc[:, 'tone'].to_numpy()
 
-            #TODO: code for getting the fmin and fmax
+            self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
             #TODO: handle filename not found
         
-        #TODO: construct with just pitch_contour?
+        #TODO: construct with just pitch_contour?        
         else:
             print("attempted to create invalid Utterance")
 

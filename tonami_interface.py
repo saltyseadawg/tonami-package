@@ -61,8 +61,8 @@ elif st.session_state.key == 1:
     if st.session_state.user_audio is not None:
         # st.write(st.session_state.user_audio)
         #TODO: extract pitch max/min
-
-        st.session_state.user = usr.User(audio=st.session_state.user_audio)
+        calibrate_utt = utt.Utterance(track=st.session_state.user_audio)
+        st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
         p = st.session_state.user.pitch_profile
         st.write(p["max_f0"], p["min_f0"])
 
