@@ -5,8 +5,8 @@ import numpy.typing as npt
 from typing import Tuple, Union
 from pydub import AudioSegment
 
-from tonami import pitch_process as pp
-from tonami import audio_utils
+import pitch_process as pp
+import audio_utils
 # stub for utterance class
 # idea right now is that it creates an utterance that has gone through all
 # the pre-processing and can be passed to our classifier or visualization model
@@ -15,7 +15,7 @@ from tonami import audio_utils
 class Utterance:
     def __init__(self, track : Union[npt.NDArray[float], AudioSegment] = None, sr=None, pitch_floor=50, pitch_ceil=400, filename : str =None, pitch_contour : npt.NDArray[float] = None, pitch_filepath : str = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'):
         #constructor overloading - if track is a time series array
-        if track != None and isinstance(track, np.ndarray):
+        if track is not None and isinstance(track, np.ndarray):
             self.track = track
             self.sr = sr
 
@@ -50,11 +50,21 @@ class Utterance:
         else:
             print("attempted to create invalid Utterance")
 
-    def pre_process(self, spkr_max, spkr_min) -> Tuple[npt.NDArray[float], npt.NDArray[int]]:
+    def pre_process(self, user) -> Tuple[npt.NDArray[float], npt.NDArray[bool], npt.NDArray[float]]:
         """Prepares the audio track for classification and visualization.
         """
-        interp = pp.preprocess(self.pitch_contour)
+        interp, nans = pp.preprocess(self.pitch_contour)
+        interp_np = np.array([interp], dtype=float)
+        # valid_mask = pp.get_valid_mask(interp_np)
+        # data_valid = interp_np[valid_mask]
+        # features = pp.basic_feature_extraction(interp_np)
+        profile = user.get_pitch_profile()
+        
+        avgd = pp.moving_average(interp_np)
+        normalized_pitch = pp.normalize_pitch(avgd, profile['max_f0'], profile['min_f0'])
+        features = pp.basic_feat_calc(normalized_pitch)
+        self.normalized_pitch = normalized_pitch
 
-        # need to normalize with speaker max and min -> different from librosa estimating pitch floor and ceil
-        self.pitch_contour = pp.moving_average(pp.normalize_pitch(interp, spkr_max, spkr_min))    
+        return normalized_pitch, nans, features #nans - mask
+        
 

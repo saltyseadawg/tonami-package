@@ -4,6 +4,7 @@ from pytest import approx
 
 from tonami import pitch_process as pp
 from tonami import Utterance as u
+from tonami import user
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
@@ -38,8 +39,10 @@ def test_pre_process():
     interp = pp.interpolate_array(cast_arr)
 
     #TODO: change the fmax and fmin to get the speakers profile
-    result = pp.normalize_pitch(interp, word.fmax, word.fmin)
-    result = pp.moving_average(result)
-    pre_processed = word.pre_process()
+    result = pp.moving_average(interp)
+    result = pp.normalize_pitch(result, word.fmax, word.fmin)
+    speaker_info = user.User(word.fmax, word.fmin)
+    pre_processed = word.pre_process(speaker_info)
 
-    assert (pre_processed == result).all()
+    assert (pre_processed[0] == result).all()
+    # assert pre_processed[0] == result

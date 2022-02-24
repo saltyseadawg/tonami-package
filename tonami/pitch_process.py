@@ -312,20 +312,24 @@ def pad_matrix(v, fillval=np.nan):
     Returns:
         np.array: a matrix with the same number of elements in each row
     """
-    lens = np.array([len(item) for item in v])
-    mask = lens[:, None] > np.arange(lens.max())
-    out = np.full(mask.shape, fillval)
-    out[mask] = np.concatenate(v)
-    return out
+    if (v.ndim == 1) and (v.dtype != 'O') :
+        return v
+    else:
+        lens = np.array([len(item) for item in v])
+        mask = lens[:, None] > np.arange(lens.max())
+        out = np.full(mask.shape, fillval)
+        out[mask] = np.concatenate(v)
+        return out
 
 def preprocess(pitch_contour):
     # truncated, but irregular
     voiced = get_voice_activity(pitch_contour)
     #TODO: interp pathway
     cast_arr = np.array(voiced, dtype=float)
+    nans, idx = get_nan_idx(cast_arr)
     interp = interpolate_array(cast_arr)
         # cast_arr = np.array(voiced, dtype=float)
-    return interp
+    return interp, nans
 
 def preprocess_all(data):
     # pitch_data = pd.read_json(PITCH_FILEPATH)
@@ -335,7 +339,8 @@ def preprocess_all(data):
 
     truncated = []
     for i in range(tone.shape[0]):
-        truncated.append(preprocess(tone[i]))
+        pitch_contour, _ = preprocess(tone[i])
+        truncated.append(pitch_contour)
 
     truncated_np = np.array(truncated, dtype=object)
     # drop all the nan rows - still irregular
