@@ -49,8 +49,11 @@ def send_data_to_frontend(user_info: dict[user.User], track: npt.NDArray[float]=
 
     Args:
         user_info (Class User): user information to obtain f0 min and max values
-        track (np.array): audio time series to be filtered
+        track (np.array, 1D): audio time series to be filtered
         tone (int): integer tone value (i.e. 1, 2, 3 or 4)
+    Returns:
+        user_pitch_contour (np.array, 1D): processed user's audio pitch contour
+        classified_tone (np.array, 1D): tone classification result from the classifier model
     """
 
     user_utterance = u.Utterance(track)
