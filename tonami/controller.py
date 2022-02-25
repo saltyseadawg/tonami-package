@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy.typing as npt
 import numpy as np
+import pandas as pd
 
 from tonami import Utterance as u
 from tonami import user
@@ -51,11 +52,12 @@ def load_exercise(filename: str = 'wo3_MV2_MP3.mp3'):
 
     return fig
 
-def send_data_to_frontend(figure, user_info: dict[user.User], track: npt.NDArray[float]=None, tone: int=None):
+def process_user_audio (figure, user_info: dict[user.User], track: npt.NDArray[float]=None, tone: int=None):
     """
     Takes the user's info, user's track and the desired tone/word
 
     Args:
+        figure (matplotlib.figure.Figure): native speaker's figure to use as a base plot
         user_info (Class User): user information to obtain f0 min and max values
         track (np.array, 1D): audio time series to be filtered
         tone (int): integer tone value (i.e. 1, 2, 3 or 4)
@@ -72,6 +74,13 @@ def send_data_to_frontend(figure, user_info: dict[user.User], track: npt.NDArray
 
     # use the same axis as the native speaker's pitch contour plot
     ax = figure.axes[0]
-    ax.plot(user_pitch_contour[0], color='blue', linewidth=3)
+    user_pitch_contour = user_pitch_contour[0]
+    y_pitch = user_pitch_contour.copy()
+    y_interp = user_pitch_contour.copy()
+    y_pitch[user_nans] = np.nan
+    
+    ax = figure.axes[0]
+    ax.plot(y_interp, color='blue', linestyle=":", linewidth=2)
+    ax.plot(y_pitch, color='blue', linewidth=3)
 
     return figure, classified_tones

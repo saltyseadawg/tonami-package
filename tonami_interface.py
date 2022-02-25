@@ -78,7 +78,7 @@ else:
     st.audio(audio_bytes, format='audio/mp3')
     
     ns_figure = cont.load_exercise(exercise["fileName"] + ".mp3")
-    st.pyplot(ns_figure)
+    st.session_state.ns_figure = ns_figure
 
     audio_btn.audio_btn()
 
@@ -94,13 +94,10 @@ else:
         #     }
         # )
         st.audio(user_bytes,format="audio/wav")
-        p = st.session_state.user
-        utter = utt.Utterance(st.session_state.user_audio)
-        utter.pre_process(p)
-        st.write(utter.normalized_pitch)
-        
+    
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result = cont.send_data_to_frontend(ns_figure, p, st.session_state.user_audio)
+        user_figure, clf_result = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
+        st.session_state.user_figure = user_figure
         st.pyplot(user_figure)
 
         # load_clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
@@ -115,9 +112,14 @@ else:
 
         # st.subheader('Prediction Probability')
         # st.write(prediction_proba)
+    else:
+        if st.session_state.user_figure is None:
+            st.pyplot(st.session_state.ns_figure)
 
 def on_next():
     st.session_state.key += 1
     st.session_state.user_audio = None
+    st.session_state.user_figure = None
+    st.session_state.ns_figure = None
 
 st.button('Next', on_click=on_next)
