@@ -1,19 +1,18 @@
 # the line above is for jupyter notebook extension on VS code
 # TODO: in final, comment out matplotlib - we want to visualize everything in visualization module
-from locale import normalize
 import warnings
 import math
+from typing import Tuple, Callable
 
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-from typing import Tuple, Callable
-from scipy.ndimage.filters import uniform_filter1d
 import scipy.signal as signal
 import pandas as pd
-import sklearn
+from scipy.ndimage.filters import uniform_filter1d
+
 
 
 # known error of package, we intend to use audioread.
@@ -29,7 +28,16 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 # Find differences between means
 # Final matrix (~9000,6 i.e. means, mean diffs)
 
-def basic_feature_extraction(pitch_contours):
+def basic_feature_extraction(pitch_contours: npt.NDArray[float]) -> npt.NDArray:
+    """
+    Batch feature extraction for multiple pitch contours after performing
+    additional processing steps in the following order:
+        - smoothing by using a moving average of 5 frames
+        - normalizing the pitch contour onto a 5 point scale
+
+    Returns:
+        np.array: Nx6 array of feature vectors for tone classification
+    """
     features = np.empty((pitch_contours.shape[0],6))
     # calcualte features - not irregular <3
     pitch_max, pitch_min = max_min_f0(pitch_contours)
@@ -42,8 +50,20 @@ def basic_feature_extraction(pitch_contours):
 
     return features
     
-# https://www.isca-speech.org/archive_v0/archive_papers/interspeech_2010/i10_0602.pdf
-def basic_feat_calc(pitch_contour):
+def basic_feat_calc(pitch_contour: npt.NDArray[float]) -> npt.NDArray:
+    """
+    Calculates the features from a single pitch contour. Refer to Liao et al.(2010)
+    paper for feature details:
+
+    https://www.isca-speech.org/archive_v0/archive_papers/interspeech_2010/i10_0602.pdf
+
+
+    Args:
+        pitch_contour (np.array): pitch values from a single utterance
+        
+    Returns:
+        np.array: 1D feature vector for tone classification 
+    """
     # pitch_contour is segmented
     # voice activity detection
 
@@ -63,7 +83,17 @@ def basic_feat_calc(pitch_contour):
     return features
 
 # https://note.nkmk.me/en/python-numpy-nan-remove/
-def get_valid_mask(contours):
+def get_valid_mask(contours: npt.NDArray[float]) -> npt.NDArray[bool]:
+    """
+    Returns a boolean array of invalid pitch contours. Invalid contours only 
+    have NaN values - no pitch was detected.
+
+    Args: 
+        contours (nd.array): Nx? array of pitch contours; may be irregular
+
+    Returns:
+        np.array: 1D length N boolean mask. False at invalid contour index. 
+    """
     # get rid of the rows with nans in the middle goddmanit
     # 1. pad the goddamn array to do black magic (np only plays nice with array that are NOT irregular)
     # 2. get the indices of pitch contours with nans in the middle
@@ -73,15 +103,15 @@ def get_valid_mask(contours):
     valid_row_mask = ~np.isnan(padded).any(axis=1)
     return valid_row_mask
 
-def get_voice_activity(pitch_contour):
+def get_voice_activity(pitch_contour: npt.NDArray[float]) -> npt.NDArray[float]:
     """
     Returns voiced frames with beginning and end silences removed.
 
     Args:
-        pitch_contour: time series of f0 returned from pitch extraction
+        pitch_contour (nd.array): time series of f0 returned from pitch extraction
             (ie. librosa.pyin)
     Returns:
-        pitch_contour: with beginning and end silences of utterance truncated
+        nd.array: pitch contour with beginning and end silences of utterance truncated
     """
     df = pd.DataFrame(pitch_contour, dtype='float64')
     start_idx = df.first_valid_index()
@@ -142,26 +172,26 @@ def interpolate_array(pitch_contour):
 
 # https://stackoverflow.com/questions/55207719/cant-understand-the-working-of-uniform-filter1d-function-imported-from-scipy'''
 # https://stackoverflow.com/questions/14313510/how-to-calculate-rolling-moving-average-using-python-numpy-scipy
-def moving_average(signal, window_len: int = 5):
+def moving_average(signal: npt.NDArray, window_len: int = 5) -> npt.NDArray:
     """
     Uses convolution to get rolling average with a window of window_len frames.
 
     Args:
-        signal (np.ndArray): time series to perform moving average on. most
+        signal (np.array): time series to perform moving average on. most
             likely pitch contour, amplitude, etc.
         window_len (int): number of frames, 5 by default
     Returns:
-        np.ndArray: times series that has been moving averaged
+        np.array: times series that has been moving averaged
     """
     return uniform_filter1d(signal, size=window_len)
 
 
-def normalize_pitch(pitch, max_f0, min_f0):
-    """
+def normalize_pitch(pitch: npt.NDArray[float], max_f0: float, min_f0: float) -> npt.NDArray[float]:
+    """ 
     Normalize pitch values using typical method in literature.
 
     Args:
-        pitch_contour: time series of f0 returned from pitch extraction
+        pitch_contour (np.array): time series of f0 returned from pitch extraction
             (ie. librosa.pyin)
         max_f0: speaker's expected upper limit on pitch
         min_f0: speaker's expected lower limit on pitch
@@ -189,15 +219,15 @@ def normalize_pitch(pitch, max_f0, min_f0):
 
 
 # TODO: move this to speaker class?
-def max_min_f0(pitch_contours):
+def max_min_f0(pitch_contours: npt.NDArray[float]):
     """
     Finds upper and lower limits on pitch for a speaker.
 
     Args:
-        pitch_contours: List of pitch contours from a speaker.
+        pitch_contours (np.array): List of pitch contours from a speaker.
     Returns:
-        pitch_max: speaker's upper limit on pitch
-        pitch_min: speaker's lower limit on pitch
+        float: speaker's upper limit on pitch
+        float : speaker's lower limit on pitch
     """
     flattened = pitch_contours
     if pitch_contours.ndim > 1:
@@ -321,17 +351,40 @@ def pad_matrix(v, fillval=np.nan):
         out[mask] = np.concatenate(v)
         return out
 
-def preprocess(pitch_contour):
+def preprocess(pitch_contour: npt.NDArray[float]) -> Tuple[npt.NDArray[float], npt.NDArray[bool]]:
+    """
+    Preprocesses a single raw pitch contour by:
+        - truncating beginning and end silences
+        - interpolating NaNs that occur in the middle of the utterance
+
+    Args:
+        pitch_contour (np.array): f0 values for a single pitch contour
+
+    Returns:
+        np.array: 1D array of a pitch contour
+        np.array: logical indices of NaN values in the original raw contour
+
+    """
     # truncated, but irregular
     voiced = get_voice_activity(pitch_contour)
     #TODO: interp pathway
     cast_arr = np.array(voiced, dtype=float)
     nans, idx = get_nan_idx(cast_arr)
     interp = interpolate_array(cast_arr)
-        # cast_arr = np.array(voiced, dtype=float)
+    # cast_arr = np.array(voiced, dtype=float)
     return interp, nans
 
-def preprocess_all(data):
+def preprocess_all(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
+    """
+    Batch preprocessing of raw pitch contours with tone category information.
+
+    Args:
+        data (pd.DataFrame): dataframe of raw pitch contours with tone label
+
+    Returns:
+        np.array: valid and preprocessed pitch contours
+        np.array: 1D array of tone labels
+    """
     # pitch_data = pd.read_json(PITCH_FILEPATH)
     tone = data.loc[:, 'pitch_contour'].to_numpy()
     label = data.loc[:, 'tone'].to_numpy()
@@ -351,7 +404,17 @@ def preprocess_all(data):
 
     return label_valid, data_valid
 
-def end_to_end(data):
+def end_to_end(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
+    """
+    Batch processes pitch contours with tone categories for training classifiers.
+
+    Args:
+        data (pd.DataFrame): dataframe of raw pitch contours with tone label
+    
+    Returns:
+        np.array: 1D array of tone labels
+        np.array: Nx6 array of feature vectors for tone classification
+    """
     # 1. read in the data
     # 2. stick into feature extraction of choice
     # 3. classify
@@ -374,140 +437,3 @@ def end_to_end(data):
     # print(f'Wrong: {features.shape[0] - tone1_counter}')
 
     return label_valid, features
-
-def ml_times():
-    pitch_data = pd.read_json(PITCH_FILEPATH)
-
-    # ALL THE FEMALE TONE PERFECT FILES
-    pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
-    end_to_end(pitch_data)
-
-    # TONE 
-    for i in range(1,5):
-        tone = pitch_data.loc[pitch_data['tone'] == i]
-        print(f'TONE: {i}')
-        end_to_end(tone)
-        print('\n')
-
-def svm_ml_times(filename='confusion.jpg'):
-    import sklearn.pipeline
-    pitch_data = pd.read_json(PITCH_FILEPATH)
-
-    # ALL THE FEMALE TONE PERFECT FILES
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV1'])]
-    label, data = end_to_end(pitch_data)
-    
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.9)
-
-    clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto'))
-    clf.fit(X_train, y_train)
-
-    sklearn.pipeline.Pipeline(steps=[('standardscaler', sklearn.preprocessing.StandardScaler()),
-                ('svc', sklearn.svm.SVC(gamma='auto'))])
-
-    y_pred = clf.predict(X_test)
-    #TODO: labels might not be in the right order looooool could be 4 3 2 1?
-    plt.figure()
-    img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
-    img.plot() #matplotlib magic hell
-    # plt.show()
-    plt.savefig(filename)
-    # TONE 
-    # for i in range(1,5):
-        # tone = pitch_data.loc[pitch_data['tone'] == i]
-        # print(f'TONE: {i}')
-        # end_to_end(tone)
-        # print('\n')
-
-def t_sne(filename="t_sne.png"):
-    pitch_data = pd.read_json(PITCH_FILEPATH)
-    speakers = ['FV1', 'FV2', 'FV3', 'MV1', 'MV2', 'MV3']
-    # ALL THE FEMALE TONE PERFECT FILES
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3'])]
-    # TODO: suspicion that MV1 has a utterance where our first_valid_index call can't find any valid index at all
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['FV1', 'FV2', 'FV3', 'MV1', 'MV2','MV3'])]
-    # pitch_data = pitch_data.loc[pitch_data['speaker'].isin(['MV2','MV3'])]
-    feat_arrs = []
-    label_arrs = []
-
-    # normalize each speaker's pitch individually
-    for i in range(len(speakers)):
-        spkr_data = pitch_data.loc[pitch_data['speaker'] == speakers[i]]
-        spkr_label, spkr_feats, = end_to_end(spkr_data)
-        feat_arrs.append(spkr_feats)
-        label_arrs.append(spkr_label)
-
-    data = np.vstack(feat_arrs)
-    label = np.concatenate(label_arrs)
-
-    tsne = sklearn.manifold.TSNE(n_components=2)
-    tsne_result = tsne.fit_transform(data)
-    tsne_result.shape
-
-    plt.figure()
-    fig, ax = plt.subplots()
-    for g in np.unique(label):
-        ix = np.where(label == g)
-        ax.scatter(tsne_result[ix, 0], tsne_result[ix, 1], label = g, s = 2)
-    ax.legend(bbox_to_anchor=(1, 1))
-    plt.savefig(filename) #save this
-# y is the amplitude of the waveform, sr is the sampling rate
-# y, sr = librosa.load('data/pronunciation_zh_嚎.mp3')
-# feature_vector = extract_feature_vector(y, 1024)
-# filter_noises(y)
-
-# %%
-
-# TODO: move this to jupyter notebook
-
-# y1_f1, sr1_f1 = librosa.load("tone_perfect_all_mp3/a1_FV1_MP3.mp3")
-# y2_f1, sr2_f1 = librosa.load("tone_perfect_all_mp3/a2_FV1_MP3.mp3")
-# y3_f1, sr3_f1 = librosa.load("tone_perfect_all_mp3/a3_FV1_MP3.mp3")
-# y4_f1, sr4_f1 = librosa.load("tone_perfect_all_mp3/a4_FV1_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.show()
-# plt.plot(y2_f1)
-# plt.show()
-# plt.plot(y3_f1)
-# plt.show()
-# plt.plot(y4_f1)
-# plt.show()
-
-# y1_f2, sr1_f2 = librosa.load("tone_perfect_all_mp3/a1_FV2_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.plot(y1_f2)
-# plt.show()
-
-# y1_f3, sr1_f3 = librosa.load("tone_perfect_all_mp3/a1_FV3_MP3.mp3")
-# plt.plot(y1_f1)
-# plt.plot(y1_f2)
-# plt.plot(y1_f3)
-# plt.show()
-# # %%
-# amp_1024 = extract_amplitude(y1_f1, 1024)
-# amp_700 = extract_amplitude(y1_f1, 700)
-# amp_300 = extract_amplitude(y1_f1, 300)
-# plt.plot(y1_f1)
-# plt.show()
-
-# plt.plot(amp_1024)
-# plt.show()
-# plt.plot(amp_700)
-# plt.show()
-# plt.plot(amp_300)
-# plt.show()
-# # %%
-# amp_1024 = extract_amplitude(y3_f1, 1024)
-# amp_700 = extract_amplitude(y3_f1, 700)
-# amp_300 = extract_amplitude(y3_f1, 300)
-# plt.plot(y3_f1)
-# plt.show()
-
-# plt.plot(amp_1024)
-# plt.show()
-# plt.plot(amp_700)
-# plt.show()
-# plt.plot(amp_300)
-# plt.show()
-

@@ -5,8 +5,8 @@ import numpy.typing as npt
 from typing import Tuple, Union
 from pydub import AudioSegment
 
-import pitch_process as pp
-import audio_utils
+from tonami import pitch_process as pp
+from tonami import audio_utils
 # stub for utterance class
 # idea right now is that it creates an utterance that has gone through all
 # the pre-processing and can be passed to our classifier or visualization model

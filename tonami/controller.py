@@ -1,14 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy.typing as npt
 import numpy as np
-import pandas as pd
 
 # TODO: comment this out before commit this
-import librosa
-import pitch_process as pp
-import Utterance as u
-import user
-import Classifier as c
+from tonami import Utterance as u
+from tonami import user
+from tonami import Classifier as c
 # functions that are called by the front-end to get plots, rating feedback, etc.
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'

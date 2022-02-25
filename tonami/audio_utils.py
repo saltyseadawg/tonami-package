@@ -1,9 +1,9 @@
 #loads desired audio from either files or parsed data
 #these guys could return a list of utterances or tracks? i'm not sure yet.
 #depends on rest of code?
-from ast import Bytes
-from pydub import AudioSegment
 import io
+
+from pydub import AudioSegment
 
 def convert_audio(audio: AudioSegment, format: str):
     """Converts an audio track into the specified audio format. 
