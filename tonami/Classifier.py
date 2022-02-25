@@ -30,10 +30,11 @@ class Classifier:
         if self.method == 'svm':
             clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
             prediction = clf.predict(features)
+            probabilities = clf.predict_proba(features)
         else:
             # other classifier models
             prediction = []
-        return prediction
+        return prediction, probabilities
 
 
 def ml_times():

@@ -70,7 +70,7 @@ def process_user_audio (figure, user_info: dict[user.User], track: npt.NDArray[f
     user_pitch_contour, user_nans, features = user_utterance.pre_process(user_info)
     
     classifier = c.Classifier(4, 'svm')
-    classified_tones = classifier.classify_tones(features)
+    classified_tones, classified_probs = classifier.classify_tones(features)
 
     # use the same axis as the native speaker's pitch contour plot
     ax = figure.axes[0]
@@ -83,4 +83,4 @@ def process_user_audio (figure, user_info: dict[user.User], track: npt.NDArray[f
     ax.plot(y_interp, color='blue', linestyle=":", linewidth=2)
     ax.plot(y_pitch, color='blue', linewidth=3)
 
-    return figure, classified_tones
+    return figure, classified_tones, classified_probs
