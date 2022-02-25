@@ -12,5 +12,19 @@
             "character": "嚎",
             "fileName": "dao2_MV1_MP3"
         }
+    ],
+    "ratings": [
+        {
+            "upperlimit": 0.8,
+            "label": "Great"
+        },
+        {
+            "upperlimit": 0.6,
+            "label": "Ok"
+        },
+        {
+            "upperlimit": 0.0,
+            "label": "Try again"
+        }
     ]
 }

@@ -2,7 +2,6 @@ import collections
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
 import sklearn
 import sklearn.pipeline
 from pydub import AudioSegment
@@ -10,13 +9,12 @@ import librosa
 import io
 import matplotlib.pyplot as plt
 
-# import sys
-# sys.path.insert(1, '/app')
 from heroku import audio_btn
 from tonami import Utterance as utt
 from tonami import pitch_process as pp
 from tonami import user as usr
 from tonami import controller as cont
+from heroku.interface_utils import *
 
 import io
 import json
@@ -36,8 +34,6 @@ if 'key' not in st.session_state:
     st.session_state.key = 0
 if 'user_audio' not in st.session_state:
     st.session_state.user_audio = None
-if 'clf' not in st.session_state:
-    st.session_state.clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
 if 'user' not in st.session_state:
     st.session_state.user = None
 
@@ -53,14 +49,11 @@ st.write(text['title'])
 
 if st.session_state.key == 0:
     st.write(text['instructions'])
-    # st.write(st.session_state.user_audio)
 elif st.session_state.key == 1:
     st.write(text['calibration'])
-    # st.write(st.session_state.user_audio)
     audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
-        # st.write(st.session_state.user_audio)
         #TODO: extract pitch max/min
         calibrate_utt = utt.Utterance(track=st.session_state.user_audio)
         st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
@@ -68,8 +61,8 @@ elif st.session_state.key == 1:
         st.write(p["max_f0"], p["min_f0"])
 
 else:
-    # st.write(st.session_state.user_audio)
     exercise = exercises[st.session_state.key - 2]
+    target_tone = int(exercise["fileName"].split("_")[0][-1])
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
     
     # TODO: need to double check this audio file path
@@ -96,30 +89,16 @@ else:
         st.audio(user_bytes,format="audio/wav")
     
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
+        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
         st.session_state.user_figure = user_figure
+        target_tone_prob = clf_probs[0,target_tone-1]
         st.pyplot(user_figure)
+        st.write("all probabilities: ", clf_probs)
+        st.write("target tone's probability: ", target_tone_prob)
+        st.write("Rating: ", get_rating(text["ratings"], target_tone_prob))
 
-        # load_clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
-
-        # # Apply model to make predictions
-        # prediction = load_clf.predict(df)
-        # prediction_proba = load_clf.predict_proba(df)
-
-        # st.subheader('Prediction')
-        # penguins_species = np.array(['Adelie','Chinstrap','Gentoo'])
-        # st.write(penguins_species[prediction])
-
-        # st.subheader('Prediction Probability')
-        # st.write(prediction_proba)
     else:
         if st.session_state.user_figure is None:
             st.pyplot(st.session_state.ns_figure)
-
-def on_next():
-    st.session_state.key += 1
-    st.session_state.user_audio = None
-    st.session_state.user_figure = None
-    st.session_state.ns_figure = None
 
 st.button('Next', on_click=on_next)
