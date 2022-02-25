@@ -2,7 +2,6 @@ import collections
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
 import sklearn
 import sklearn.pipeline
 from pydub import AudioSegment
@@ -35,8 +34,6 @@ if 'key' not in st.session_state:
     st.session_state.key = 0
 if 'user_audio' not in st.session_state:
     st.session_state.user_audio = None
-if 'clf' not in st.session_state:
-    st.session_state.clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
 if 'user' not in st.session_state:
     st.session_state.user = None
 
@@ -52,14 +49,11 @@ st.write(text['title'])
 
 if st.session_state.key == 0:
     st.write(text['instructions'])
-    # st.write(st.session_state.user_audio)
 elif st.session_state.key == 1:
     st.write(text['calibration'])
-    # st.write(st.session_state.user_audio)
     audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
-        # st.write(st.session_state.user_audio)
         #TODO: extract pitch max/min
         calibrate_utt = utt.Utterance(track=st.session_state.user_audio)
         st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
@@ -67,7 +61,6 @@ elif st.session_state.key == 1:
         st.write(p["max_f0"], p["min_f0"])
 
 else:
-    # st.write(st.session_state.user_audio)
     exercise = exercises[st.session_state.key - 2]
     target_tone = int(exercise["fileName"].split("_")[0][-1])
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
