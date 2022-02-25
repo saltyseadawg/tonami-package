@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy.typing as npt
 import numpy as np
-import pandas as pd
 
-from tonami import pitch_process as pp
 from tonami import Utterance as u
 from tonami import user
 from tonami import Classifier as c
