@@ -5,8 +5,8 @@ import numpy.typing as npt
 from typing import Tuple, Union
 from pydub import AudioSegment
 
-import pitch_process as pp
-import audio_utils
+from tonami import pitch_process as pp
+from tonami import audio_utils
 # stub for utterance class
 # idea right now is that it creates an utterance that has gone through all
 # the pre-processing and can be passed to our classifier or visualization model
@@ -62,7 +62,7 @@ class Utterance:
         
         avgd = pp.moving_average(interp_np)
         normalized_pitch = pp.normalize_pitch(avgd, profile['max_f0'], profile['min_f0'])
-        features = pp.basic_feat_calc(normalized_pitch)
+        features = np.array([pp.basic_feat_calc(normalized_pitch[0])])
         self.normalized_pitch = normalized_pitch
 
         return normalized_pitch, nans, features #nans - mask

@@ -5,12 +5,12 @@
     "calibration_end": "Thank you for patience. You may now proceed to the next module",
     "exercises": [
         {
-            "character": "好玩",
-            "fileName": "forvo_zh_好玩"
+            "character": "好玩 <-- this needs to be updated",
+            "fileName": "an1_FV3_MP3"
         },
         {
             "character": "嚎",
-            "fileName": "pronunciation_zh_嚎"
+            "fileName": "dao2_MV1_MP3"
         }
     ]
 }

@@ -19,7 +19,7 @@ class Classifier:
     def classify_tones(self, features):
         # TODO: further development is required to use different classifier models, fit the data and classify the tone
         if self.method == 'svm':
-            clf = pickle.load(open('data/pickled_svm_80.pkl', 'rb'))
+            clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
             prediction = clf.predict(features)
         else:
             # other classifier models
