@@ -16,6 +16,7 @@ from heroku import audio_btn
 from tonami import Utterance as utt
 from tonami import pitch_process as pp
 from tonami import user as usr
+from tonami import controller as cont
 
 import io
 import json
@@ -71,10 +72,14 @@ else:
     exercise = exercises[st.session_state.key - 2]
     st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
     
-    with open("data/" + exercise["fileName"] + ".mp3", 'rb') as f:
+    # TODO: need to double check this audio file path
+    with open("data/tone_perfect/" + exercise["fileName"] + ".mp3", 'rb') as f:
         audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
+    ns_figure = cont.load_exercise(exercise["fileName"] + ".mp3")
+    st.session_state.ns_figure = ns_figure
+
     audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
@@ -89,10 +94,11 @@ else:
         #     }
         # )
         st.audio(user_bytes,format="audio/wav")
-        p = st.session_state.user.pitch_profile
-        utter = utt.Utterance(st.session_state.user_audio)
-        utter.pre_process(p["max_f0"], p["min_f0"])
-        st.write(utter.pitch_contour)
+    
+        # processing user's audio and getting the pitch contour on top of the native speaker's
+        user_figure, clf_result = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
+        st.session_state.user_figure = user_figure
+        st.pyplot(user_figure)
 
         # load_clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
 
@@ -106,9 +112,14 @@ else:
 
         # st.subheader('Prediction Probability')
         # st.write(prediction_proba)
+    else:
+        if st.session_state.user_figure is None:
+            st.pyplot(st.session_state.ns_figure)
 
 def on_next():
     st.session_state.key += 1
     st.session_state.user_audio = None
+    st.session_state.user_figure = None
+    st.session_state.ns_figure = None
 
 st.button('Next', on_click=on_next)

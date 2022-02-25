@@ -62,7 +62,7 @@ class Utterance:
         
         avgd = pp.moving_average(interp_np)
         normalized_pitch = pp.normalize_pitch(avgd, profile['max_f0'], profile['min_f0'])
-        features = pp.basic_feat_calc(normalized_pitch)
+        features = np.array([pp.basic_feat_calc(normalized_pitch[0])])
         self.normalized_pitch = normalized_pitch
 
         return normalized_pitch, nans, features #nans - mask
