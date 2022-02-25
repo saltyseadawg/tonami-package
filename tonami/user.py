@@ -2,14 +2,6 @@
 # holds any and all user relevant data we need
 # import logging
 
-import librosa
-import numpy as np
-from pydub import AudioSegment
-import soundfile as sf
-
-from tonami import pitch_process as pp
-from tonami import audio_utils
-
 class User:
     def __init__(self, max_f0=50, min_f0=400):
 
