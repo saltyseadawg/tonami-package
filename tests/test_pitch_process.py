@@ -60,3 +60,15 @@ def test_interp():
     assert (interp.shape == result.shape) 
     # below throws hard to understand error if the arrays are not the same size
     assert (interp == result).all()
+
+def test_min_max_f0():
+    # 1D array
+    arr = np.array([100,1,2,3,4,5,np.nan])
+    expected_max, expected_min = 100, 1
+    result_max, result_min = pp.max_min_f0(arr)
+    assert (expected_max, expected_min == result_max, result_min)
+
+    # irregular array
+    irregular_arr = np.array([[100,1,2,3,4,5,np.nan], [1,np.nan], []], dtype=object)
+    result_max, result_min = pp.max_min_f0(irregular_arr)
+    assert (expected_max, expected_min == result_max, result_min)
