@@ -15,16 +15,16 @@
     ],
     "ratings": [
         {
-            "upperlimit": 0.8,
-            "label": "Great"
+            "upperlimit": 0.5,
+            "label": "Great work!"
         },
         {
-            "upperlimit": 0.6,
+            "upperlimit": 0.0,
             "label": "Ok"
         },
         {
             "upperlimit": 0.0,
-            "label": "Try again"
+            "label": "Not quite, try again?"
         }
     ]
 }
