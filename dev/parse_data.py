@@ -13,6 +13,37 @@ from tonami import pitch_process as pp
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
+# TODO: THIS SHIT BROKEN, YEET! (load_audio is EMPTY BRO)
+def parse_wav_pitch(file_path, library="parselmouth"):
+    file_dict = {}
+    file_name = str(file_path)[39:]
+    file_dict["filename"] = file_name
+    sections = file_name.split("_")
+    file_dict["speaker"] = sections[0]
+    file_dict["syllable"] = sections[1][: len(sections[1]) - 1]
+    file_dict["tone"] = sections[1][-1]
+
+    time_series, file_dict["sample"] = load_audio_file(file_path)
+    file_dict["pitch_contour"], voiced_flag, voiced_probs = librosa.pyin(
+            time_series, fmin=50, fmax=400)
+    
+    # TODO: make consistent with other parsing function
+    # if(library == "parselmouth"):
+    #     sound_file = parselmouth.Sound(str(file_path))
+    #     file_dict["sample"] = sound_file.get_sampling_frequency()
+        
+    #     pitch = sound_file.to_pitch()
+    #     pitch_values = pitch.selected_array['frequency']
+    #     pitch_values[pitch_values==0] = np.nan
+        
+    #     file_dict["pitch_contour"] = pitch_values
+    # else:
+    #     time_series, file_dict["sample"] = load_audio_file(file_path)
+    #     file_dict["pitch_contour"], voiced_flag, voiced_probs = librosa.pyin(
+    #         time_series, fmin=50, fmax=500
+    #     )
+    return file_dict
+
 def parse_toneperfect_pitch(file_path, library):
     """Returns a dict containing metadata and pitch for a Tone Perfect file.
     TODO: pitch retrieved with librosa, want to do same thing with parselmouth
@@ -127,6 +158,7 @@ def save_speaker_max_min():
     )
     df.to_json(output)
 
+# TODO: move to classifier class lmao
 def save_classifier_data(
     clf,
     name = "svm_80"

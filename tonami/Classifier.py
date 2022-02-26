@@ -80,6 +80,7 @@ def svm_ml_times(filename='confusion.jpg'):
         # print(f'TONE: {i}')
         # end_to_end(tone)
         # print('\n')
+    #TODO: this doesn't even return clf to be saved
 
 def t_sne(filename="t_sne.png"):
     pitch_data = pd.read_json(PITCH_FILEPATH)

@@ -35,15 +35,22 @@ class Utterance:
             self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
 
         elif filename != None:
-            self.PITCH_FILEPATH = pitch_filepath
+
             self.filename = filename
 
-            self.pitch_data = pd.read_json(self.PITCH_FILEPATH)
-            self.pitch_data = self.pitch_data.loc[self.pitch_data['filename'].isin([self.filename])]
-            self.pitch_contour = np.array(self.pitch_data.loc[:, 'pitch_contour'].to_numpy()[0], dtype=float)
-            self.label = self.pitch_data.loc[:, 'tone'].to_numpy()
+            if(pitch_filepath is None): #TODO: this is deranged
+                time_series, _ = librosa.load(filename)
+                self.pitch_contour, _, _ = librosa.pyin(time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
+                self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour) #accurate for normalizing
+            else:
+                self.PITCH_FILEPATH = pitch_filepath
+                
+                self.pitch_data = pd.read_json(self.PITCH_FILEPATH)
+                self.pitch_data = self.pitch_data.loc[self.pitch_data['filename'].isin([self.filename])]
+                self.pitch_contour = np.array(self.pitch_data.loc[:, 'pitch_contour'].to_numpy()[0], dtype=float)
+                self.label = self.pitch_data.loc[:, 'tone'].to_numpy()
 
-            self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
+                self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
             #TODO: handle filename not found
         
         #TODO: construct with just pitch_contour?        
