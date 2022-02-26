@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pydub
 import streamlit as st
-import matplotlib.pyplot as plt
 import streamlit as st
 from streamlit_webrtc import (
     webrtc_streamer,
@@ -36,7 +35,7 @@ MEDIA_STREAM_CONSTRAINTS = {
 
 # https://github.com/whitphx/streamlit-webrtc/issues/357
 
-def save_frames_from_audio_receiver(wavpath):
+def save_frames_from_audio_receiver(filename):
     webrtc_ctx = webrtc_streamer(
         key="sendonly-audio",
         mode=WebRtcMode.SENDONLY,
@@ -81,16 +80,15 @@ def save_frames_from_audio_receiver(wavpath):
     audio_buffer = st.session_state["audio_buffer"]
 
     if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-        st.session_state.user_audio = audio_buffer
+        st.session_state.user_audio = filename
+        audio_buffer.export(filename, format="mp3")
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
-        return True
-    return False
 
 def audio_btn():
     st.markdown('# Recorder')
     cur_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
     tmp_wavpath = TMP_DIR / f'{cur_time}.mp3'
     audio_file = str(tmp_wavpath)
-
     if audio_file:
         save_frames_from_audio_receiver(audio_file)  # second way
+    
