@@ -50,6 +50,8 @@ def save_frames_from_audio_receiver(filename):
 
     status_indicator = st.empty()
     lottie = False
+    is_connected = False
+
     while True:
         # save audio AFTER user has clicked start
         if webrtc_ctx.audio_receiver and webrtc_ctx.state.playing:
@@ -64,6 +66,9 @@ def save_frames_from_audio_receiver(filename):
             #     lottie = True
 
             for i, audio_frame in enumerate(audio_frames):
+                if not is_connected:
+                    is_connected = True
+                    st.write('Recording...')
                 sound = pydub.AudioSegment(
                     data=audio_frame.to_ndarray().tobytes(),
                     sample_width=audio_frame.format.bytes,
