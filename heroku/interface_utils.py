@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 
 def on_next():
     st.session_state.key += 1
@@ -10,7 +11,7 @@ def get_rating(rating_meta, target_tone, clf_probs):
     target_prob = clf_probs[0][target_tone-1]
 
     # if the probability of any other tone is >= 90%, return try again
-    for prob in clf_probs[0][~target_tone-1]:
+    for prob in clf_probs[0][np.arange(len(clf_probs[0]))!=(target_tone-1)]:
         if prob >= 0.9:
             return rating_meta[-1]["label"]
 
