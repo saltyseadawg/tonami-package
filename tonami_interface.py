@@ -95,7 +95,7 @@ else:
         st.pyplot(user_figure)
         st.write("all probabilities: ", clf_probs)
         st.write("target tone's probability: ", target_tone_prob)
-        st.write("Rating: ", get_rating(text["ratings"], target_tone_prob))
+        st.write("Rating: ", get_rating(text["ratings"], target_tone, clf_probs))
 
     else:
         if st.session_state.user_figure is None:
