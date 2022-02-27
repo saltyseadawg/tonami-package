@@ -49,6 +49,7 @@ with open('heroku/interface_text.json') as json_file:
     text = json.load(json_file)
 
 exercises = text["exercises"]
+last_page = len(exercises) + 2
 
 st.write(text['title'])
 
@@ -68,10 +69,14 @@ elif st.session_state.key == 1:
         else:
             st.write('Calibration failed. Please try recording again.')
 
+elif st.session_state.key == last_page:
+    st.write(text['end_page'])
+
 else:
     exercise = exercises[st.session_state.key - 2]
-    target_tone = int(exercise["fileName"].split("_")[0][-1])
-    st.write("Test ", str(st.session_state.key - 1), " - ", exercise["character"])
+    st.write("Test ", str(st.session_state.key - 1))
+    st.write("## ", exercise["character"], " ", exercise["pinyin"], " ", str(exercise["tone"]))
+    st.write(exercise["translation"])
     
     # TODO: need to double check this audio file path
     exercise_path = os.path.join(EXERCISE_DIR, f'{exercise["fileName"]}.mp3')
@@ -104,14 +109,16 @@ else:
         # processing user's audio and getting the pitch contour on top of the native speaker's
         user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
         st.session_state.user_figure = user_figure
-        target_tone_prob = clf_probs[0,target_tone-1]
+        target_tone_prob = clf_probs[0,exercise['tone']-1]
         st.pyplot(user_figure)
         # st.write("all probabilities: ", clf_probs)
         # st.write("target tone's probability: ", target_tone_prob)
         st.write("Rating: ", get_rating(text["ratings"], target_tone, clf_probs))
 
+
     else:
         if st.session_state.user_figure is None:
             st.pyplot(st.session_state.ns_figure)
 
-st.button('Next', on_click=on_next)
+if st.session_state.key != last_page:
+    st.button('Next', on_click=on_next)
