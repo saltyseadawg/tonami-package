@@ -1,3 +1,4 @@
+from pickle import NONE
 import librosa
 import pandas as pd
 import numpy as np
@@ -7,13 +8,15 @@ from pydub import AudioSegment
 
 from tonami import pitch_process as pp
 from tonami import audio_utils
+from tonami.Classifier import PITCH_FILEPATH
 # stub for utterance class
 # idea right now is that it creates an utterance that has gone through all
 # the pre-processing and can be passed to our classifier or visualization model
 # possibly stores its own classification/probability as well?
 
+
 class Utterance:
-    def __init__(self, track : Union[npt.NDArray[float], AudioSegment] = None, sr=None, pitch_floor=50, pitch_ceil=400, filename : str =None, pitch_contour : npt.NDArray[float] = None, pitch_filepath : str = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'):
+    def __init__(self, track : Union[npt.NDArray[float], AudioSegment] = None, sr=None, pitch_floor=50, pitch_ceil=400, filename : str =None, pitch_contour : npt.NDArray[float] = None, pitch_filepath : str = None):
         #constructor overloading - if track is a time series array
         if track is not None and isinstance(track, np.ndarray):
             self.track = track
@@ -34,11 +37,11 @@ class Utterance:
             self.pitch_contour, self.voiced_flag, self.voiced_prob = librosa.pyin(y, fmin=pitch_floor, fmax=pitch_ceil)
             self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour)
 
-        elif filename != None:
+        elif filename is not None:
 
             self.filename = filename
 
-            if(pitch_filepath is None): #TODO: this is deranged
+            if pitch_filepath is None: #TODO: this is deranged
                 time_series, _ = librosa.load(filename)
                 self.pitch_contour, _, _ = librosa.pyin(time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
                 self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour) #accurate for normalizing

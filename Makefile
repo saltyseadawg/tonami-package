@@ -38,3 +38,15 @@ test:
 test-container:
 	docker run -it  -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
 	"python -m pytest tests/"
+
+# release commands
+build-heroku:
+	docker build -f Dockerfile.heroku -t registry.heroku.com/tonami-testing/web .
+
+push-heroku:
+	docker push registry.heroku.com/tonami-testing/web
+
+image-id:
+	docker inspect --format="{{.Id}}" registry.heroku.com/tonami-testing/web
+
+
