@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy.typing as npt
 import numpy as np
@@ -27,7 +29,7 @@ def load_exercise(filename: str = 'wo3_MV2_MP3.mp3'):
     speaker_min_f0 = speakers_info.loc[speakers_info['speaker_name'] == speaker, 'min_f0']
     speaker_info = user.User(speaker_max_f0, speaker_min_f0)
 
-    word = u.Utterance(filename = filename)
+    word = u.Utterance(filename = filename, pitch_filepath=PITCH_FILEPATH)
     pitch_contour, nans, _ = word.pre_process(speaker_info)
     pitch_contour = pitch_contour[0]
 
@@ -52,7 +54,7 @@ def load_exercise(filename: str = 'wo3_MV2_MP3.mp3'):
 
     return fig
 
-def process_user_audio (figure, user_info: dict[user.User], track: npt.NDArray[float]=None, tone: int=None):
+def process_user_audio (figure, user_info: dict[user.User], filename:str, tone: int=None):
     """
     Takes the user's info, user's track and the desired tone/word
 
@@ -66,7 +68,7 @@ def process_user_audio (figure, user_info: dict[user.User], track: npt.NDArray[f
         classified_tone (np.array, 1D): tone classification result from the classifier model
     """
 
-    user_utterance = u.Utterance(track)
+    user_utterance = u.Utterance(filename=filename)
     user_pitch_contour, user_nans, features = user_utterance.pre_process(user_info)
     
     classifier = c.Classifier(4, 'svm')
