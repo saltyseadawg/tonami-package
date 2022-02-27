@@ -89,10 +89,14 @@ def save_frames_from_audio_receiver(filename):
         audio_buffer.export(filename, format="mp3")
         st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-def audio_btn():
+def audio_btn(exercise_info=None):
     st.markdown('# Recorder')
+    st.write("After pressing \"Start\" button, please wait until \"Recording...\" message appears below the button.")
     cur_time = time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
-    tmp_wavpath = TMP_DIR / f'{cur_time}.mp3'
+    if exercise_info is not None:
+        tmp_wavpath = TMP_DIR / f'ex{exercise_info}_{cur_time}.mp3'
+    else:
+        tmp_wavpath = TMP_DIR / f'{cur_time}.mp3'
     audio_file = str(tmp_wavpath)
     if audio_file:
         save_frames_from_audio_receiver(audio_file)  # second way
