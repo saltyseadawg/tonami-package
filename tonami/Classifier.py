@@ -17,23 +17,15 @@ PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
 
 class Classifier:
-    def __init__(self, num_classes, method='svm'):
+    def __init__(self, num_classes):
         self.num_classes = num_classes
-        self.method = method
 
-    def get_probability() -> npt.NDArray[float]:
-        #associated probability of being in each class
-        pass
+    def load_clf(self, filename):
+        self.clf = pickle.load(open(filename, 'rb'))
     
     def classify_tones(self, features):
-        # TODO: further development is required to use different classifier models, fit the data and classify the tone
-        if self.method == 'svm':
-            clf = pickle.load(open('tonami/data/pickled_svm_80.pkl', 'rb'))
-            prediction = clf.predict(features)
-            probabilities = clf.predict_proba(features)
-        else:
-            # other classifier models
-            prediction = []
+        prediction = self.clf.predict(features)
+        probabilities = self.clf.predict_proba(features)
         return prediction, probabilities
 
 
@@ -115,3 +107,18 @@ def t_sne(filename="t_sne.png"):
     ax.legend(bbox_to_anchor=(1, 1))
     plt.savefig(filename) #save this
 
+def save_classifier_data(
+    clf,
+    name = "svm_80"
+):
+    file_name = "tonami/data/pickled_" + name + ".pkl"
+
+    # pitch_data = pd.read_json(PITCH_FILEPATH)
+    # label, data = pp.end_to_end(pitch_data)
+    
+    # X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.2)
+
+    # clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto', probability=True))
+    # clf.fit(X_train, y_train)
+
+    pickle.dump(clf, open(file_name, 'wb'))
