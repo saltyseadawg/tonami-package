@@ -54,6 +54,7 @@ if 'text' not in st.session_state:
 st.session_state.user_audio = None
 
 text = st.session_state.text
+calibration = text["calibration"]
 exercises = text["exercises"]
 last_page = len(exercises) + 2
 intervention_num = len(exercises) - 8
@@ -65,18 +66,18 @@ st.write(text['title'])
 if st.session_state.key == 0:
     st.write(text['instructions'])
 elif st.session_state.key == 1:
-    st.write(text['calibration'])
+    st.write(calibration['instructions'])
+    st.write(calibration['phrase'])
     audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
-        #TODO: extract pitch max/min
         calibrate_utt = utt.Utterance(filename=st.session_state.user_audio)
         st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
         p = st.session_state.user.pitch_profile
         if not np.isnan(p["max_f0"]) and not np.isnan(p["min_f0"]):
-            st.write(text["calibration_end"][1])
+            st.write(calibration["success"])
         else:
-            st.write(text["calibration_end"][0])
+            st.write(calibration["fail"])
 
 elif st.session_state.key == last_page:
     st.write(text['end_page'])
