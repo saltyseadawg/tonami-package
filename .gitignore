@@ -1,6 +1,6 @@
 .streamlit/
-temp.py
-*/temp.y
+temp**
+*/temp.py
 */tone_perfect/*
 *.png
 Pipfile

@@ -65,9 +65,6 @@ class Utterance:
         """
         interp, nans = pp.preprocess(self.pitch_contour)
         interp_np = np.array([interp], dtype=float)
-        # valid_mask = pp.get_valid_mask(interp_np)
-        # data_valid = interp_np[valid_mask]
-        # features = pp.basic_feature_extraction(interp_np)
         profile = user.get_pitch_profile()
         
         avgd = pp.moving_average(interp_np)
