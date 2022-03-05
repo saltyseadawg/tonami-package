@@ -11,7 +11,7 @@ import scipy.signal as signal
 import pandas as pd
 from scipy.ndimage.filters import uniform_filter1d
 
-import pitch_process as pp
+from tonami import pitch_process as pp
 
 # https://note.nkmk.me/en/python-numpy-nan-remove/
 def get_valid_mask(contours: npt.NDArray[float]) -> npt.NDArray[bool]:
@@ -30,7 +30,7 @@ def get_valid_mask(contours: npt.NDArray[float]) -> npt.NDArray[bool]:
     # 2. get the indices of pitch contours with nans in the middle
     # 3. mask that shit
     # 4. profit
-    padded = np.array(pad_matrix(contours, fillval='420.69'), dtype=float)
+    padded = np.array(pp.pad_matrix(contours, fillval='420.69'), dtype=float)
     valid_row_mask = ~np.isnan(padded).any(axis=1)
     return valid_row_mask
 
