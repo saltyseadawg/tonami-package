@@ -1,9 +1,37 @@
 {
     "title": "# Tonami",
-    "instructions": "Please wait for instructions from the interviewer",
-    "calibration": "We'll need to calibrate our algorithmn to your voice. Please speak the follow section aloud:  \n One winter a Farmer found a Snake stiff and frozen with cold. He had compassion on it, and taking it up, placed it in his bosom. The Snake was quickly revived by the warmth, and resuming its natural instincts, bit its benefactor, inflicting on him a mortal wound. 'Oh,' cried the Farmer with his last breath, 'I am rightly served for pitying a scoundrel.'",
+    "instructions": "Please wait for instructions from the interviewer.  \n   \n Please note that your audio will be recorded.  \n By clicking Next, you agree to allowing your recordings to be shared anonymously with the team and trusted evaluators.",
+    "calibration": "According to all known laws of aviation, there is no way a bee should be able to fly. Do you think bees care what humans think is impossible?",
     "calibration_end": "Thank you for patience. You may now proceed to the next module",
     "exercises": [
+        {
+            "character": "罚",
+            "pinyin": "fá",
+            "tone": 2,
+            "translation": "punish",
+            "fileName": "fa2_FV1_MP3"
+        },
+        {
+            "character": "法",
+            "pinyin": "fǎ",
+            "tone": 3,
+            "translation": "law",
+            "fileName": "fa3_MV1_MP3"
+        },
+        {
+            "character": "发",
+            "pinyin": "fā",
+            "tone": 1,
+            "translation": "send",
+            "fileName": "fa1_FV3_MP3"
+        },
+        {
+            "character": "髪",
+            "pinyin": "fà",
+            "tone": 4,
+            "translation": "hairstyle",
+            "fileName": "fa4_MV2_MP3"
+        },
         {
             "character": "明",
             "pinyin": "míng",
@@ -115,20 +143,48 @@
             "tone": 3,
             "translation": "previous",
             "fileName": "bao3_FV3_MP3"
+        },
+        {
+            "character": "罚",
+            "pinyin": "fá",
+            "tone": 2,
+            "translation": "punish",
+            "fileName": "fa2_FV1_MP3"
+        },
+        {
+            "character": "法",
+            "pinyin": "fǎ",
+            "tone": 3,
+            "translation": "law",
+            "fileName": "fa3_MV1_MP3"
+        },
+        {
+            "character": "发",
+            "pinyin": "fā",
+            "tone": 1,
+            "translation": "send",
+            "fileName": "fa1_FV3_MP3"
+        },
+        {
+            "character": "髪",
+            "pinyin": "fà",
+            "tone": 4,
+            "translation": "hairstyle",
+            "fileName": "fa4_MV2_MP3"
         }
     ],
     "ratings": [
         {
             "upperlimit": 0.5,
-            "label": "Great work!"
+            "label": "Great job!  \n Practice some more to make sure you've got it, or move onto the next module."
         },
         {
             "upperlimit": 0.0,
-            "label": "Ok"
+            "label": "Almost there!  \n It sounds good, but there are still some parts that could be improved if you wanted to."
         },
         {
             "upperlimit": 0.0,
-            "label": "Not quite, try again?"
+            "label": "Not quite, try again?  \n Listen to your recording versus the example's and try to hear the differences."
         }
     ],
     "end_page": "Thank you for your participation❤️  \n If you would like to know more, please contact us at fydp.team3@gmail.com"

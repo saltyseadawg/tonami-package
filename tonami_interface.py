@@ -50,6 +50,9 @@ with open('heroku/interface_text.json') as json_file:
 
 exercises = text["exercises"]
 last_page = len(exercises) + 2
+intervention_num = len(exercises) - 8
+intervention_begin = 6
+intervention_end = intervention_begin + intervention_num - 1
 
 st.write(text['title'])
 
@@ -74,7 +77,7 @@ elif st.session_state.key == last_page:
 
 else:
     exercise = exercises[st.session_state.key - 2]
-    st.write("Test ", str(st.session_state.key - 1))
+    st.write("Exercise ", str(st.session_state.key - 1))
     st.write("## ", exercise["character"], " ", exercise["pinyin"], " ", str(exercise["tone"]))
     st.write(exercise["translation"])
     
@@ -84,10 +87,12 @@ else:
         audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
-    ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
-    st.session_state.ns_figure = ns_figure
+    if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
+        st.session_state.ns_figure = ns_figure
 
-    audio_btn.audio_btn()
+    filename_sections = exercise["fileName"].split("_")
+    audio_btn.audio_btn(str(st.session_state.key - 1) + "_" + filename_sections[0])
 
     if st.session_state.user_audio is not None:
         # user_bytes = convert_audio(st.session_state.user_audio, 'wav').getvalue()
@@ -106,18 +111,19 @@ else:
         #     }
         # )
     
+        if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
-        st.session_state.user_figure = user_figure
-        target_tone_prob = clf_probs[0,exercise['tone']-1]
-        st.pyplot(user_figure)
-        # st.write("all probabilities: ", clf_probs)
-        # st.write("target tone's probability: ", target_tone_prob)
-        st.write("Rating: ", get_rating(text["ratings"], target_tone, clf_probs))
+            user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
+            st.session_state.user_figure = user_figure
+            target_tone_prob = clf_probs[0,exercise['tone']-1]
+            st.pyplot(user_figure)
+            # st.write("all probabilities: ", clf_probs)
+            # st.write("target tone's probability: ", target_tone_prob)
+            st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
 
 
     else:
-        if st.session_state.user_figure is None:
+        if st.session_state.user_figure is None and st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
             st.pyplot(st.session_state.ns_figure)
 
 if st.session_state.key != last_page:
