@@ -15,6 +15,7 @@ from tonami import Utterance as utt
 from tonami import pitch_process as pp
 from tonami import user as usr
 from tonami import controller as cont
+from tonami import Classifier as c
 from heroku.interface_utils import *
 from azure.storage.blob import BlobServiceClient
 
@@ -41,13 +42,19 @@ if 'user_audio' not in st.session_state:
     st.session_state.user_audio = None
 if 'user' not in st.session_state:
     st.session_state.user = None
+if 'clf' not in st.session_state:
+    clf = c.Classifier(4)
+    clf.load_clf('tonami/data/pickled_svm_80.pkl')    
+    st.session_state.clf = clf
+if 'text' not in st.session_state:
+    with open('heroku/interface_text.json') as json_file:
+        text = json.load(json_file)
+    st.session_state.text = text
 
 st.session_state.user_audio = None
 
-# Opening JSON file
-with open('heroku/interface_text.json') as json_file:
-    text = json.load(json_file)
-
+text = st.session_state.text
+calibration = text["calibration"]
 exercises = text["exercises"]
 last_page = len(exercises) + 2
 intervention_num = len(exercises) - 8
@@ -59,18 +66,18 @@ st.write(text['title'])
 if st.session_state.key == 0:
     st.write(text['instructions'])
 elif st.session_state.key == 1:
-    st.write(text['calibration'])
+    st.write(calibration['instructions'])
+    st.write(calibration['phrase'])
     audio_btn.audio_btn()
 
     if st.session_state.user_audio is not None:
-        #TODO: extract pitch max/min
         calibrate_utt = utt.Utterance(filename=st.session_state.user_audio)
         st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
         p = st.session_state.user.pitch_profile
         if not np.isnan(p["max_f0"]) and not np.isnan(p["min_f0"]):
-            st.write('Calibration complete!')
+            st.write(calibration["success"])
         else:
-            st.write('Calibration failed. Please try recording again.')
+            st.write(calibration["fail"])
 
 elif st.session_state.key == last_page:
     st.write(text['end_page'])
@@ -113,14 +120,13 @@ else:
     
         if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
         # processing user's audio and getting the pitch contour on top of the native speaker's
-            user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio)
-            st.session_state.user_figure = user_figure
-            target_tone_prob = clf_probs[0,exercise['tone']-1]
-            st.pyplot(user_figure)
-            # st.write("all probabilities: ", clf_probs)
-            # st.write("target tone's probability: ", target_tone_prob)
-            st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
-
+        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
+        st.session_state.user_figure = user_figure
+        target_tone_prob = clf_probs[0,exercise['tone']-1]
+        st.pyplot(user_figure)
+        # st.write("all probabilities: ", clf_probs)
+        # st.write("target tone's probability: ", target_tone_prob)
+        st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
 
     else:
         if st.session_state.user_figure is None and st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:

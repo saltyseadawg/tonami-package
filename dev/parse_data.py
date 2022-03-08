@@ -157,20 +157,3 @@ def save_speaker_max_min():
         }
     )
     df.to_json(output)
-
-# TODO: move to classifier class lmao
-def save_classifier_data(
-    clf,
-    name = "svm_80"
-):
-    file_name = "tonami/data/pickled_" + name + ".pkl"
-
-    # pitch_data = pd.read_json(PITCH_FILEPATH)
-    # label, data = pp.end_to_end(pitch_data)
-    
-    # X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=0.2)
-
-    # clf = sklearn.pipeline.make_pipeline(sklearn.preprocessing.StandardScaler(), sklearn.svm.SVC(gamma='auto', probability=True))
-    # clf.fit(X_train, y_train)
-
-    pickle.dump(clf, open(file_name, 'wb'))
