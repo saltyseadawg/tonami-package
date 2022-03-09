@@ -57,9 +57,6 @@ text = st.session_state.text
 calibration = text["calibration"]
 exercises = text["exercises"]
 last_page = len(exercises) + 2
-intervention_num = len(exercises) - 8
-intervention_begin = 6
-intervention_end = intervention_begin + intervention_num - 1
 
 st.write(text['title'])
 
@@ -94,9 +91,8 @@ else:
         audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
-    if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
-        ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
-        st.session_state.ns_figure = ns_figure
+    ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
+    st.session_state.ns_figure = ns_figure
 
     filename_sections = exercise["fileName"].split("_")
     audio_btn.audio_btn(str(st.session_state.key - 1) + "_" + filename_sections[0])
@@ -118,7 +114,6 @@ else:
         #     }
         # )
     
-        if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
         # processing user's audio and getting the pitch contour on top of the native speaker's
         user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
         st.session_state.user_figure = user_figure
@@ -129,7 +124,7 @@ else:
         st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
 
     else:
-        if st.session_state.user_figure is None and st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        if st.session_state.user_figure is None:
             st.pyplot(st.session_state.ns_figure)
 
 if st.session_state.key != last_page:
