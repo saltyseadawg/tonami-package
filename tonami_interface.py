@@ -62,19 +62,10 @@ st.write(text['title'])
 
 if st.session_state.key == 0:
     st.write(text['instructions'])
-elif st.session_state.key == 1:
-    st.write(calibration['instructions'])
-    st.write(calibration['phrase'])
-    audio_btn.audio_btn()
-
-    if st.session_state.user_audio is not None:
-        calibrate_utt = utt.Utterance(filename=st.session_state.user_audio)
-        st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
-        p = st.session_state.user.pitch_profile
-        if not np.isnan(p["max_f0"]) and not np.isnan(p["min_f0"]):
-            st.write(calibration["success"])
-        else:
-            st.write(calibration["fail"])
+elif st.session_state.key == 1: 
+    voice_label = st.radio(calibration['options_instructions'], calibration['options_labels'], 1)
+    voice_info = calibration['options_info'][calibration['options_labels'].index(voice_label)]
+    st.session_state.user = usr.User(voice_info['max_f0'], voice_info['min_f0'])
 
 elif st.session_state.key == last_page:
     st.write(text['end_page'])
