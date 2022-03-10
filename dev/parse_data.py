@@ -2,6 +2,7 @@ import re
 import os
 import shutil
 import datetime
+import random
 from pathlib import Path
 
 import numpy as np
@@ -170,14 +171,30 @@ def rename_user_testing_audio(source_folder: str, out_folder: str, start_time: d
 
     for f in Path(source_folder).rglob("*.mp3"):
         og_file = str(f)
-        match = re.search(r'[a-zA-Z0-9/]*ex[0-9]*_([a-z]*[0-9])_(.+?).mp3', og_file)
-        parsed_date = match.group(2)
-        syl = match.group(1)
+        match = re.search(r'(ex[0-9]+)_([a-z]*[0-9])_(.+?).mp3', og_file)
+        parsed_date = match.group(3)
+        syl = match.group(2)
+        ex_num = match.group(1)
         # https://stackoverflow.com/questions/35231285/python-how-to-split-a-string-by-non-alpha-characters
         # split all non word chars (basically non-alphanumeric) and underscores
         split_datetime = [int(x) for x in re.split(r'[\W_]+', parsed_date)]
         datetime_obj = datetime.datetime(*split_datetime)
         if start_time <= datetime_obj <= end_time:
-            new_filename = f'{syl}_{user_id}_user-testing.mp3'
+            counter = 1
+            new_filename = f'{syl}_{user_id}_{ex_num}_R{counter}_user-testing.mp3'
             new_filename = str(Path(out_folder, new_filename))
+            while os.path.isfile(new_filename):
+                counter += 1
+                new_filename = f'{syl}_{user_id}_{ex_num}_R{counter}_user-testing.mp3'
+                new_filename = str(Path(out_folder, new_filename))
             shutil.copy(og_file, new_filename)
+
+def select_files_random(source_folder, out_folder, num):
+    if not os.path.isdir(out_folder):
+        os.makedirs(out_folder)
+    p = Path(source_folder).rglob("*")
+    files = [x for x in p if x.is_file()]
+    selected = random.choices(files, k=num)
+    for f in selected:
+        new_filename = str(Path(out_folder, f.name))
+        shutil.copy(str(f), new_filename)
