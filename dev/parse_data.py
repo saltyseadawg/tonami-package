@@ -76,7 +76,7 @@ def parse_toneperfect_pitch(file_path, library):
         file_dict["pitch_contour"] = pitch_values
     else:
         time_series, file_dict["sample"] = load_audio_file(file_path)
-        file_dict["pitch_contour"], voiced_flag, voiced_probs = librosa.pyin(
+        file_dict["pitch_contour"], _, _ = librosa.pyin(
             time_series, fmin=50, fmax=500
         )
     return file_dict
@@ -194,7 +194,103 @@ def select_files_random(source_folder, out_folder, num):
         os.makedirs(out_folder)
     p = Path(source_folder).rglob("*")
     files = [x for x in p if x.is_file()]
-    selected = random.choices(files, k=num)
+    selected = random.sample(files, k=num)
     for f in selected:
         new_filename = str(Path(out_folder, f.name))
         shutil.copy(str(f), new_filename)
+
+def parse_user_testing_pitch(file_path, library):
+    """Returns a dict containing metadata and pitch for a user testing file.
+    TODO: pitch retrieved with librosa, want to do same thing with parselmouth
+
+    Args:
+        file_path (str): a Tone perfect file
+    Returns:
+        dict: metadata and pitch information
+    """
+    p = Path(file_path)
+    file_dict = {}
+    file_dict["filename"] = p.name
+    sections = p.name.split('_')
+    # low or high
+    file_dict["voice"] = sections[1][0]
+    file_dict["speaker"] = sections[1]
+    file_dict["syllable"] = sections[0][: len(sections[0]) - 1]
+    file_dict["tone"] = sections[0][-1]
+    file_dict['exercise'] = sections[2]
+    file_dict['recording'] = sections[3]
+    file_dict["database"] = "user-testing"
+
+    fmin, fmax = 50, 400
+    # if file_dict['voice'] == 'L':
+    #     fmin, fmax = 50, 300
+    # elif file_dict['voice'] == 'M':
+    #     fmin, fmax = 100, 300
+    # else:
+    #     fmin, fmax = 100, 400
+
+    if(library == "parselmouth"):
+        sound_file = parselmouth.Sound(str(file_path))
+        file_dict["sample"] = sound_file.get_sampling_frequency()
+        
+        pitch = sound_file.to_pitch()
+        pitch_values = pitch.selected_array['frequency']
+        pitch_values[pitch_values==0] = np.nan
+        
+        file_dict["pitch_contour"] = pitch_values
+    else:
+        time_series, file_dict["sample"] = librosa.load(file_path)
+        file_dict["pitch_contour"], _, _ = librosa.pyin(
+            time_series, fmin=fmin, fmax=fmax
+        )
+    return file_dict
+
+def write_user_testing_pitch_data(
+    folder_path="data/processed_testing",
+    output="data/parsed/user_testing.json",
+    library="librosa"
+):
+    """Creates a json file containing metadata and pitch information from
+    Tone Perfect files found in folder_path.
+
+    Args:
+        folder_path (str): target folder that is searched
+        output (str): name of file that is created
+        library (str): name of library to be used for pitch extraction
+    """
+
+    files, db, syl, tone, voice, spkr, sample, pitch, recording, exercise = ([] for i in range(10))
+    counter = 0
+    for f in Path(folder_path).rglob("*.mp3"):
+        mtd = parse_user_testing_pitch(f, library)
+        files.append(mtd["filename"])
+        db.append(mtd["database"])
+        syl.append(mtd["syllable"])
+        tone.append(mtd["tone"])
+        voice.append(mtd["voice"])
+        spkr.append(mtd["speaker"])
+        sample.append(mtd["sample"])
+        pitch.append(mtd["pitch_contour"])
+        recording.append(mtd["recording"])
+        exercise.append(mtd["exercise"])
+        if counter%100 == 0:
+            # ~600 user testing files total
+            print(f"{counter} files processed!")
+        counter += 1
+
+    df = pd.DataFrame(
+        {
+            "filename": pd.Series(files),
+            "database": pd.Series(db),
+            "syllable": pd.Series(syl),
+            "tone": pd.Series(tone),
+            "voice": pd.Series(voice),
+            "speaker": pd.Series(spkr),
+            "sampling_rate": pd.Series(sample),
+            "pitch_contour": pd.Series(pitch, dtype=object),
+            "recording": pd.Series(recording),
+            "exercise": pd.Series(exercise)
+
+        }
+    )
+    df.to_json(output)
