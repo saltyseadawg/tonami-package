@@ -89,21 +89,8 @@ else:
     audio_btn.audio_btn(str(st.session_state.key - 1) + "_" + filename_sections[0])
 
     if st.session_state.user_audio is not None:
-        # user_bytes = convert_audio(st.session_state.user_audio, 'wav').getvalue()
-        # with open(st.session_state.user_audio, 'rb') as f:
-        #     user_audio_bytes = f.read()
-        upload_file(st.session_state.blob_service_client, st.session_state.user_audio)
+        # upload_file(st.session_state.blob_service_client, st.session_state.user_audio)
         st.audio(st.session_state.user_audio, format="audio/mp3")
-
-        # with open(st.session_state.user_audio, "rb") as f:
-            # encoded = Binary(f.read())
-        # we can only insert files < 16 MB into our db
-        # st.collection.insert_one(
-        #     {
-        #         'date': datetime.now(),
-        #         'file': user_bytes
-        #     }
-        # )
     
         # processing user's audio and getting the pitch contour on top of the native speaker's
         user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
