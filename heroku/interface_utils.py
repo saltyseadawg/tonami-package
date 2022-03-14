@@ -11,6 +11,8 @@ def on_next():
     st.session_state.user_audio = None
     st.session_state.user_figure = None
     st.session_state.ns_figure = None
+    
+    st.session_state.is_demo_file = False
 
 def get_rating(rating_meta, target_tone, clf_probs):
     target_prob = clf_probs[0][target_tone-1]

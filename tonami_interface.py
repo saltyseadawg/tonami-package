@@ -27,6 +27,7 @@ from tonami.audio_utils import convert_audio
 
 CONNECT_STR = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 EXERCISE_DIR = 'data/tone_perfect/'
+DEMO_DIR = 'data/demo/'
 
 st.session_state.blob_service_client = BlobServiceClient.from_connection_string(CONNECT_STR)
 
@@ -51,6 +52,11 @@ if 'text' not in st.session_state:
         text = json.load(json_file)
     st.session_state.text = text
 
+if 'user_demo' not in st.session_state:
+    st.session_state.user_demo = usr.User(350, 100)
+if 'is_demo_file' not in st.session_state:
+    st.session_state.is_demo_file = False
+
 st.session_state.user_audio = None
 
 text = st.session_state.text
@@ -63,7 +69,7 @@ st.write(text['title'])
 if st.session_state.key == 0:
     st.write(text['instructions'])
 elif st.session_state.key == 1: 
-    voice_label = st.radio(calibration['options_instructions'], calibration['options_labels'], 1)
+    voice_label = st.radio(calibration['options_instructions'], calibration['options_labels'])
     voice_info = calibration['options_info'][calibration['options_labels'].index(voice_label)]
     st.session_state.user = usr.User(voice_info['max_f0'], voice_info['min_f0'])
 
@@ -88,12 +94,17 @@ else:
     filename_sections = exercise["fileName"].split("_")
     audio_btn.audio_btn(str(st.session_state.key - 1) + "_" + filename_sections[0])
 
+    if st.button('Do it for me'):
+        st.session_state.user_audio = os.path.join(DEMO_DIR, f'{filename_sections[0]}.mp3')
+        st.session_state.is_demo_file = True
+
     if st.session_state.user_audio is not None:
         # upload_file(st.session_state.blob_service_client, st.session_state.user_audio)
         st.audio(st.session_state.user_audio, format="audio/mp3")
     
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
+        temp_user = st.session_state.user if not st.session_state.is_demo_file else st.session_state.user_demo
+        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, temp_user, st.session_state.user_audio, st.session_state.clf)
         st.session_state.user_figure = user_figure
         target_tone_prob = clf_probs[0,exercise['tone']-1]
         st.pyplot(user_figure)
