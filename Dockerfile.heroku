@@ -6,6 +6,7 @@ WORKDIR /app
 # COPY data/forvo_zh_好玩.mp3 data/forvo_zh_好玩.mp3
 # COPY data/pronunciation_zh_嚎.mp3 data/pronunciation_zh_嚎.mp3
 COPY data/tone_perfect data/tone_perfect 
+COPY data/demo data/demo
 COPY requirements/ requirements/
 RUN pip3 install --no-cache-dir -r requirements/requirements.txt
 COPY tonami/ tonami/

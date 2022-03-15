@@ -1,6 +1,6 @@
 {
     "title": "# Tonami",
-    "instructions": "Please wait for instructions from the interviewer.  \n   \n Please note that your audio will be recorded.  \n By clicking Next, you agree to allowing your recordings to be shared anonymously with the team and trusted evaluators.",
+    "instructions": "Welcome to our Mandarin tone learning tool!   \n   \n In this demo, you can try a couple of our speaking exercises.   \n To complete an exercise, listen to the sample audio and then hit 'START' to try it yourself. Please wait for 'Recording...' to appear before speaking.\n Press 'STOP' when you're done recording.   \n   \n Rest assured, NONE of your data will be saved.",
     "calibration": {
         "instructions": "We'll need to calibrate our algorithmn to your voice. Please speak the following section aloud:",
         "phrase": "According to all known laws of aviation, there is no way a bee should be able to fly. Do you think bees care what humans think is impossible?",
