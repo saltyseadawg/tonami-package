@@ -342,9 +342,9 @@ def preprocess(pitch_contour: npt.NDArray[float]) -> Tuple[npt.NDArray[float], n
 
     """
     # truncated, but irregular
-    voiced = get_voice_activity(pitch_contour)
+    # voiced = get_voice_activity(pitch_contour)
     #TODO: interp pathway
-    cast_arr = np.array(voiced, dtype=float)
+    cast_arr = np.array(pitch_contour, dtype=float)
     nans, idx = get_nan_idx(cast_arr)
     interp = interpolate_array(cast_arr)
     # cast_arr = np.array(voiced, dtype=float)
