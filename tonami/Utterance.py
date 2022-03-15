@@ -48,9 +48,10 @@ class Utterance:
                 #TODO: Probably find a more appropriate place to filter out the noise (preprocessing?)
                 # Needs to be applied before librosa.pyin
 
-                filtered_time_series, _ = librosa.effects.trim(y=time_series, top_db=DB_THRESHOLD)
+                if not 'tone_perfect' in filename
+                    time_series, _ = librosa.effects.trim(y=time_series, top_db=DB_THRESHOLD)
 
-                self.pitch_contour, _, _ = librosa.pyin(filtered_time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
+                self.pitch_contour, _, _ = librosa.pyin(time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
                 self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour) #accurate for normalizing
             else:
                 self.PITCH_FILEPATH = pitch_filepath
