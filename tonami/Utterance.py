@@ -48,7 +48,7 @@ class Utterance:
                 #TODO: Probably find a more appropriate place to filter out the noise (preprocessing?)
                 # Needs to be applied before librosa.pyin
 
-                if not 'tone_perfect' in filename
+                if 'tone_perfect' not in filename:
                     time_series, _ = librosa.effects.trim(y=time_series, top_db=DB_THRESHOLD)
 
                 self.pitch_contour, _, _ = librosa.pyin(time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
