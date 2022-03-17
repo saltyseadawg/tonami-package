@@ -42,6 +42,8 @@ if 'user_audio' not in st.session_state:
     st.session_state.user_audio = None
 if 'user' not in st.session_state:
     st.session_state.user = None
+if 'db_threshold' not in st.session_state:
+    st.session_state.db_threshold = int(10)
 if 'clf' not in st.session_state:
     clf = c.Classifier(4)
     clf.load_clf('tonami/data/pickled_svm_80.pkl')    
@@ -69,9 +71,10 @@ elif st.session_state.key == 1:
     st.write(calibration['instructions'])
     st.write(calibration['phrase'])
     audio_btn.audio_btn()
+    st.session_state.db_threshold = st.number_input('Decibel threshold: ', min_value=-80, max_value=100, step=1, format="%i", value=10)
 
     if st.session_state.user_audio is not None:
-        calibrate_utt = utt.Utterance(filename=st.session_state.user_audio)
+        calibrate_utt = utt.Utterance(filename=st.session_state.user_audio, db_threshold=st.session_state.db_threshold)
         st.session_state.user = usr.User(calibrate_utt.fmax, calibrate_utt.fmin)
         p = st.session_state.user.pitch_profile
         if not np.isnan(p["max_f0"]) and not np.isnan(p["min_f0"]):
@@ -83,6 +86,7 @@ elif st.session_state.key == last_page:
     st.write(text['end_page'])
 
 else:
+    is_intervention = st.session_state.key < intervention_begin or st.session_state.key > intervention_end
     exercise = exercises[st.session_state.key - 2]
     st.write("Exercise ", str(st.session_state.key - 1))
     st.write("## ", exercise["character"], " ", exercise["pinyin"], " ", str(exercise["tone"]))
@@ -94,12 +98,13 @@ else:
         audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
-    if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+    if not is_intervention:
         ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
         st.session_state.ns_figure = ns_figure
 
     filename_sections = exercise["fileName"].split("_")
     audio_btn.audio_btn(str(st.session_state.key - 1) + "_" + filename_sections[0])
+    st.session_state.db_threshold = st.number_input('Decibel threshold: ', min_value=-80, max_value=100, step=1, format="%i", value=10)
 
     if st.session_state.user_audio is not None:
         # user_bytes = convert_audio(st.session_state.user_audio, 'wav').getvalue()
@@ -118,18 +123,18 @@ else:
         #     }
         # )
     
-        if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        if not is_intervention:
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
-        st.session_state.user_figure = user_figure
-        target_tone_prob = clf_probs[0,exercise['tone']-1]
-        st.pyplot(user_figure)
-        # st.write("all probabilities: ", clf_probs)
-        # st.write("target tone's probability: ", target_tone_prob)
-        st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
+            user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf, db_threshold=st.session_state.db_threshold)
+            st.session_state.user_figure = user_figure
+            target_tone_prob = clf_probs[0,exercise['tone']-1]
+            st.pyplot(user_figure)
+            # st.write("all probabilities: ", clf_probs)
+            # st.write("target tone's probability: ", target_tone_prob)
+            st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
 
     else:
-        if st.session_state.user_figure is None and st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        if st.session_state.user_figure is None and not is_intervention:
             st.pyplot(st.session_state.ns_figure)
 
 if st.session_state.key != last_page:
