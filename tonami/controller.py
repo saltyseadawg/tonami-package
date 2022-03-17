@@ -54,7 +54,7 @@ def load_exercise(filename: str = 'wo3_MV2_MP3.mp3'):
 
     return fig
 
-def process_user_audio (figure, user_info: dict[user.User], filename:str, classifier:c.Classifier, tone: int=None):
+def process_user_audio (figure, user_info: dict[user.User], filename:str, classifier:c.Classifier, tone: int=None, db_threshold=10):
     """
     Takes the user's info, user's track and the desired tone/word
 
@@ -68,7 +68,7 @@ def process_user_audio (figure, user_info: dict[user.User], filename:str, classi
         classified_tone (np.array, 1D): tone classification result from the classifier model
     """
 
-    user_utterance = u.Utterance(filename=filename)
+    user_utterance = u.Utterance(filename=filename, db_threshold=db_threshold)
     user_pitch_contour, user_nans, features = user_utterance.pre_process(user_info)
 
     classified_tones, classified_probs = classifier.classify_tones(features)
