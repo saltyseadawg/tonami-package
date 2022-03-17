@@ -198,3 +198,27 @@ def select_files_random(source_folder, out_folder, num):
     for f in selected:
         new_filename = str(Path(out_folder, f.name))
         shutil.copy(str(f), new_filename)
+
+def get_sampled_data_info(source_folder):
+    all_files = Path(source_folder).rglob("*.mp3")
+    speaker_info = dict()
+    tone_info = dict()
+    for file_name in all_files:
+        sections = str(file_name).split("_")
+        word = re.split('(\d+)', sections[0])
+        syllable = word[0].split("/")[-1]
+        tone = word[1]
+        speaker = sections[1]
+
+        if speaker in speaker_info:
+            speaker_info[speaker] = speaker_info.get(speaker) + 1
+        else: 
+            speaker_info[speaker] = 1
+            
+        if tone in tone_info:
+            tone_info[tone] = tone_info.get(tone) + 1
+        else: 
+            tone_info[tone] = 1
+            
+    return speaker_info, tone_info
+    
