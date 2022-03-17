@@ -83,6 +83,7 @@ elif st.session_state.key == last_page:
     st.write(text['end_page'])
 
 else:
+    is_intervention = st.session_state.key < intervention_begin or st.session_state.key > intervention_end
     exercise = exercises[st.session_state.key - 2]
     st.write("Exercise ", str(st.session_state.key - 1))
     st.write("## ", exercise["character"], " ", exercise["pinyin"], " ", str(exercise["tone"]))
@@ -94,7 +95,7 @@ else:
         audio_bytes = f.read()
     st.audio(audio_bytes, format='audio/mp3')
     
-    if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+    if not is_intervention:
         ns_figure = cont.load_exercise(f'{exercise["fileName"]}.mp3')
         st.session_state.ns_figure = ns_figure
 
@@ -118,18 +119,18 @@ else:
         #     }
         # )
     
-        if st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        if not is_intervention:
         # processing user's audio and getting the pitch contour on top of the native speaker's
-        user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
-        st.session_state.user_figure = user_figure
-        target_tone_prob = clf_probs[0,exercise['tone']-1]
-        st.pyplot(user_figure)
-        # st.write("all probabilities: ", clf_probs)
-        # st.write("target tone's probability: ", target_tone_prob)
-        st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
+            user_figure, clf_result, clf_probs = cont.process_user_audio(ns_figure, st.session_state.user, st.session_state.user_audio, st.session_state.clf)
+            st.session_state.user_figure = user_figure
+            target_tone_prob = clf_probs[0,exercise['tone']-1]
+            st.pyplot(user_figure)
+            # st.write("all probabilities: ", clf_probs)
+            # st.write("target tone's probability: ", target_tone_prob)
+            st.write("###", "Rating: ", get_rating(text["ratings"], exercise['tone'], clf_probs))
 
     else:
-        if st.session_state.user_figure is None and st.session_state.key >= intervention_begin and st.session_state.key <= intervention_end:
+        if st.session_state.user_figure is None and not is_intervention:
             st.pyplot(st.session_state.ns_figure)
 
 if st.session_state.key != last_page:
