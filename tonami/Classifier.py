@@ -32,9 +32,9 @@ class Classifier:
         probabilities = self.clf.predict_proba(features)
         return prediction, probabilities
 
-def get_data_sets(speakers, test_size):
+def get_data_sets(speakers, train_size):
     '''
-    Reads data from json and splits data based on desired speakers and test_size
+    Reads data from json and splits data based on desired speakers and train_size
     '''
     pitch_data = pd.read_json(PITCH_FILEPATH)
 
@@ -43,18 +43,19 @@ def get_data_sets(speakers, test_size):
 
     label, data = ppb.end_to_end(pitch_data)
 
-    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, test_size=test_size)
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(data, label, train_size=train_size)
     return X_train, X_test, y_train, y_test
 
-def get_data_set_dist(y):
+def get_data_set_stats(y):
     '''
-    Returns y's distribution percentage with labels
+    Returns y's distribution percentage with labels and length of y
     '''
+    num = len(y)
     hist = Counter(y)
-    dist = [(i, hist[i] / len(y) * 100.0) for i in hist]
+    dist = [(i, hist[i] / num * 100.0) for i in hist]
     dist = sorted(dist, key=lambda tup: tup[0])
     dist = [dist[0][1], dist[1][1], dist[2][1], dist[3][1]]
-    return dist
+    return dist, num
 
 def save_pipeline_data(pipe, name):
     '''
@@ -63,7 +64,7 @@ def save_pipeline_data(pipe, name):
     file_name = PICKLED_FILEPATH + "pickled_" + name + ".pkl"
     pickle.dump(pipe, open(file_name, 'wb'))
 
-def save_pipeline_meta(info, score, y_train_dist, y_test_dist):
+def save_pipeline_meta(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len):
     '''
     Saves the pipeline meta data as a json.
     '''
@@ -73,9 +74,11 @@ def save_pipeline_meta(info, score, y_train_dist, y_test_dist):
         'Date': str(datetime.now().strftime("%d/%m/%Y %H:%M:%S")),
         'Type': info['type'],
         'Preprocessing': info['preprocessing'],
-        'Train Size': 1-info['test_size'],
+        'Train Size': info['train_size'],
         'Accuracy': score,
+        'Train Number': y_train_len,
         'Train Distribution': [y_train_dist],
+        'Test Number': y_test_len,
         'Test Distribtuion': [y_test_dist]
     }
     row = pd.DataFrame(row)
@@ -99,20 +102,22 @@ def get_data_from_pipe(pipe, info, speakers=[]):
     '''
     Takes in pipeline and name. Gets datasets, trains and saves pipeline and stats.
     '''
-    X_train, X_test, y_train, y_test = get_data_sets(speakers, info['test_size'])
+    X_train, X_test, y_train, y_test = get_data_sets(speakers, info['train_size'])
     pipe.fit(X_train, y_train)
     y_pred = pipe.predict(X_test)
     score = balanced_accuracy_score(y_test, y_pred)
-    y_train_dist = get_data_set_dist(y_train)
-    y_test_dist = get_data_set_dist(y_test)
+    y_train_dist, y_train_len = get_data_set_stats(y_train)
+    y_test_dist, y_test_len = get_data_set_stats(y_test)
 
     save_pipeline_data(pipe, info['name'])
-    save_pipeline_meta(info, score, y_train_dist, y_test_dist)
+    save_pipeline_meta(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len)
     save_confusion_matrix(y_test, y_pred, info['name'])
 
     print('score: ', score)
-    print('y_train_dist: ', y_train_dist)
-    print('y_test_dist: ', y_test_dist)
+    print('train samples: ', y_train_len)
+    print('train dist: ', y_train_dist)
+    print('test samples: ', y_test_len)
+    print('test dist: ', y_test_dist)
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
