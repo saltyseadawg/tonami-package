@@ -3,6 +3,7 @@
 #method is method of classification. k-means, etc.
 #k-fold stuff should also go in here, PCA, etc.
 
+from datetime import datetime
 from collections import Counter
 import pickle
 import numpy as np
@@ -17,6 +18,7 @@ from tonami import pitch_process_batch as ppb
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 CONFUSION_FILEPATH = 'temp/'
 PICKLED_FILEPATH = 'tonami/data/'
+MODEL_META_FILEPATH = 'tonami/data/model_metadata.json'
 
 class Classifier:
     def __init__(self, num_classes):
@@ -50,6 +52,8 @@ def get_data_set_dist(y):
     '''
     hist = Counter(y)
     dist = [(i, hist[i] / len(y) * 100.0) for i in hist]
+    dist = sorted(dist, key=lambda tup: tup[0])
+    dist = [dist[0][1], dist[1][1], dist[2][1], dist[3][1]]
     return dist
 
 def save_pipeline_data(pipe, name):
@@ -58,6 +62,27 @@ def save_pipeline_data(pipe, name):
     '''
     file_name = PICKLED_FILEPATH + "pickled_" + name + ".pkl"
     pickle.dump(pipe, open(file_name, 'wb'))
+
+def save_pipeline_meta(info, score, y_train_dist, y_test_dist):
+    '''
+    Saves the pipeline meta data as a json.
+    '''
+    data = pd.read_json(MODEL_META_FILEPATH, orient="index")
+    row = {
+        'Name': info['name'],
+        'Date': str(datetime.now().strftime("%d/%m/%Y %H:%M:%S")),
+        'Type': info['type'],
+        'Preprocessing': info['preprocessing'],
+        'Train Size': 1-info['test_size'],
+        'Accuracy': score,
+        'Train Distribution': [y_train_dist],
+        'Test Distribtuion': [y_test_dist]
+    }
+    row = pd.DataFrame(row)
+    data = data.drop(data[data.Name == info['name']].index)
+    data = pd.concat([data, row], ignore_index=True)
+    data.to_json(MODEL_META_FILEPATH, orient="index")
+
 
 def save_confusion_matrix(y_test, y_pred, name):
     '''
@@ -70,20 +95,24 @@ def save_confusion_matrix(y_test, y_pred, name):
     filename = CONFUSION_FILEPATH + 'confusion_' + name + '.jpg'
     plt.savefig(filename)
 
-def get_data_from_pipe(pipe, name, speakers=[], test_size=0.2):
+def get_data_from_pipe(pipe, info, speakers=[]):
     '''
     Takes in pipeline and name. Gets datasets, trains and saves pipeline and stats.
     '''
-    X_train, X_test, y_train, y_test = get_data_sets(speakers, test_size)
+    X_train, X_test, y_train, y_test = get_data_sets(speakers, info['test_size'])
     pipe.fit(X_train, y_train)
     y_pred = pipe.predict(X_test)
+    score = balanced_accuracy_score(y_test, y_pred)
+    y_train_dist = get_data_set_dist(y_train)
+    y_test_dist = get_data_set_dist(y_test)
 
-    save_pipeline_data(pipe, name)
-    save_confusion_matrix(y_test, y_pred, name)
+    save_pipeline_data(pipe, info['name'])
+    save_pipeline_meta(info, score, y_train_dist, y_test_dist)
+    save_confusion_matrix(y_test, y_pred, info['name'])
 
-    print('score: ', balanced_accuracy_score(y_test, y_pred))
-    print('y_train: ', get_data_set_dist(y_train))
-    print('y_test: ', get_data_set_dist(y_test))
+    print('score: ', score)
+    print('y_train_dist: ', y_train_dist)
+    print('y_test_dist: ', y_test_dist)
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
