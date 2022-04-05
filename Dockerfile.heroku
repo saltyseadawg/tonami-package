@@ -10,8 +10,8 @@ COPY requirements/ requirements/
 RUN pip3 install --no-cache-dir -r requirements/requirements.txt
 COPY tonami/ tonami/
 COPY heroku/ heroku/
-COPY tonami_interface.py tonami_interface.py
+COPY tonami_requirements_interface.py tonami_requirements_interface.py
 COPY data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json
 
 
-CMD ["sh", "-c", "streamlit run --server.port $PORT tonami_interface.py"]
+CMD ["sh", "-c", "streamlit run --server.port $PORT tonami_requirements_interface.py"]

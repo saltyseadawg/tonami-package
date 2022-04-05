@@ -21,7 +21,7 @@ jupyter-server:
 
 heroku-server:
 	docker run -it -p 8501:8501 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
-	"streamlit run tonami_interface.py"
+	"streamlit run tonami_requirements_interface.py"
 
 # code formatting
 # TODO: exclude jupyter notebook checkpoints, as they are auto saved versions of the file

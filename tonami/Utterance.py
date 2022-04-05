@@ -15,7 +15,7 @@ from tonami.Classifier import PITCH_FILEPATH
 # possibly stores its own classification/probability as well?
 
 class Utterance:
-    def __init__(self, track : Union[npt.NDArray[float], AudioSegment] = None, sr=None, pitch_floor=50, pitch_ceil=400, filename : str =None, pitch_contour : npt.NDArray[float] = None, pitch_filepath : str = None, db_threshold=10):
+    def __init__(self, track : Union[npt.NDArray[float], AudioSegment] = None, sr=None, pitch_floor=50, pitch_ceil=400, filename : str =None, pitch_contour : npt.NDArray[float] = None, pitch_filepath : str = None, db_threshold=10, trim=True):
         #constructor overloading - if track is a time series array
         if track is not None and isinstance(track, np.ndarray):
             self.track = track
@@ -42,7 +42,10 @@ class Utterance:
 
             if pitch_filepath is None: #TODO: this is deranged
                 time_series, _ = librosa.load(filename)
-                time_series, _ = librosa.effects.trim(y=time_series, top_db=db_threshold)
+                
+                if trim:
+                    time_series, _ = librosa.effects.trim(y=time_series, top_db=db_threshold)
+
                 self.pitch_contour, _, _ = librosa.pyin(time_series, fmin=pitch_floor, fmax=pitch_ceil) #guessing
                 self.fmax, self.fmin = pp.max_min_f0(self.pitch_contour) #accurate for normalizing
             else:
