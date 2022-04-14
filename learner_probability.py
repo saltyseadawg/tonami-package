@@ -40,7 +40,8 @@ def main():
 
             word = u.Utterance(filename = file_mp3)
             if(np.isnan(word.pitch_contour).all()):
-               continue
+                print(file)
+                continue
             pitch_contour, nans, features = word.pre_process(speaker_info)
             pred, prob = clf.classify_tones(features)
             tone1.append(prob[0][0])
@@ -55,6 +56,7 @@ def main():
             speaker = user.User(word.fmax + 50, word.fmin - 50)
             normalized_pitch, nans, features = word.pre_process(speaker)
             if(np.isnan(word.pitch_contour).all()):
+                print(file)
                 continue
             pred, prob = clf.classify_tones(features)
             tone1.append(prob[0][0])
