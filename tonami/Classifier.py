@@ -98,7 +98,7 @@ def save_confusion_matrix(y_test, y_pred, name):
     filename = CONFUSION_FILEPATH + 'confusion_' + name + '.jpg'
     plt.savefig(filename)
 
-def get_data_from_pipe(pipe, info, speakers=[]):
+def get_data_from_pipe(pipe, info, speakers=[], print_results=True):
     '''
     Takes in pipeline and name. Gets datasets, trains and saves pipeline and stats.
     '''
@@ -113,11 +113,12 @@ def get_data_from_pipe(pipe, info, speakers=[]):
     save_pipeline_meta(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len)
     save_confusion_matrix(y_test, y_pred, info['name'])
 
-    print('score: ', score)
-    print('train samples: ', y_train_len)
-    print('train dist: ', y_train_dist)
-    print('test samples: ', y_test_len)
-    print('test dist: ', y_test_dist)
+    if print_results:
+        print('score: ', score)
+        print('train samples: ', y_train_len)
+        print('train dist: ', y_train_dist)
+        print('test samples: ', y_test_len)
+        print('test dist: ', y_test_dist)
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
