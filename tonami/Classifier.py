@@ -17,8 +17,9 @@ from tonami import pitch_process_batch as ppb
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 CONFUSION_FILEPATH = 'temp/'
-PICKLED_FILEPATH = 'tonami/data/'
-MODEL_META_FILEPATH = 'tonami/data/model_metadata.json'
+PICKLED_FILEPATH = 'tonami/data/pickled_models/'
+MODEL_INFO_FILEPATH = 'tonami/data/model_info.json'
+MODEL_TRAIN_STATS_FILEPATH = 'tonami/data/model_training_stats.json'
 
 class Classifier:
     def __init__(self, num_classes):
@@ -58,36 +59,43 @@ def get_data_set_stats(y):
     dist = np.around(dist, 2)
     return dist, num
 
-def save_pipeline_data(pipe, name):
+def save_pipeline_pkl(pipe, index):
     '''
     Saves the pipeline data in a pickle file to be loaded later
     '''
-    file_name = PICKLED_FILEPATH + "pickled_" + name + ".pkl"
+    file_name = PICKLED_FILEPATH + "pickled_" + str(index) + ".pkl"
     pickle.dump(pipe, open(file_name, 'wb'))
 
-def save_pipeline_meta(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len):
+def save_pipeline_data(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len):
     '''
-    Saves the pipeline meta data as a json.
+    Saves the pipeline data as a json.
     '''
-    metadata = pd.read_json(MODEL_META_FILEPATH, orient="index")
-    row = {
-        'Name': info['name'],
+
+    def insert_model_data(filepath, index, new_row): 
+        existing_data = pd.read_json(filepath, orient="index")
+        existing_data.loc[index] = new_row
+        existing_data = existing_data.sort_index().reset_index(drop=True)
+        existing_data.to_json(filepath, orient="index", date_format=None, date_unit='s')
+
+    info_row = {
         'Date': int(datetime.now().timestamp()),
-        'Type': info['type'],
+        'Accuracy': score,
+        'Segments': info['segments'],
         'Preprocessing': info['preprocessing'],
         'Train Size': info['train_size'],
-        'Accuracy': score,
-        'Train Number': y_train_len,
-        'Train Distribution': [y_train_dist],
-        'Test Number': y_test_len,
-        'Test Distribution': [y_test_dist]
+        'Type': info['type']
     }
-    row = pd.DataFrame(row)
-    metadata = metadata.drop(metadata[metadata.Name == info['name']].index)
-    metadata = pd.concat([metadata, row], ignore_index=True)
-    metadata.to_json(MODEL_META_FILEPATH, orient="index", date_format=None, date_unit='s')
+    stat_row = {
+        'Train Number': y_train_len,
+        'Train Distribution': y_train_dist,
+        'Test Number': y_test_len,
+        'Test Distribution': y_test_dist
+    }
 
-def save_confusion_matrix(y_test, y_pred, name):
+    insert_model_data(MODEL_INFO_FILEPATH, info['index'], info_row)
+    insert_model_data(MODEL_TRAIN_STATS_FILEPATH, info['index'], stat_row)
+
+def save_confusion_matrix(y_test, y_pred, index):
     '''
     Creates a confusion matrix and saves it
     '''
@@ -95,8 +103,9 @@ def save_confusion_matrix(y_test, y_pred, name):
     plt.figure()
     img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
     img.plot()
-    filename = CONFUSION_FILEPATH + 'confusion_' + name + '.jpg'
+    filename = CONFUSION_FILEPATH + 'confusion_' + str(index) + '.jpg'
     plt.savefig(filename)
+    plt.close()
 
 def get_data_from_pipe(pipe, info, speakers=[], print_results=True):
     '''
@@ -109,9 +118,9 @@ def get_data_from_pipe(pipe, info, speakers=[], print_results=True):
     y_train_dist, y_train_len = get_data_set_stats(y_train)
     y_test_dist, y_test_len = get_data_set_stats(y_test)
 
-    save_pipeline_data(pipe, info['name'])
-    save_pipeline_meta(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len)
-    save_confusion_matrix(y_test, y_pred, info['name'])
+    save_pipeline_pkl(pipe, info['index'])
+    save_pipeline_data(info, score, y_train_dist, y_test_dist, y_train_len, y_test_len)
+    save_confusion_matrix(y_test, y_pred, info['index'])
 
     if print_results:
         print('score: ', score)
@@ -166,3 +175,4 @@ def t_sne(filename="t_sne.png"):
         ax.scatter(tsne_result[ix, 0], tsne_result[ix, 1], label = g, s = 2)
     ax.legend(bbox_to_anchor=(1, 1))
     plt.savefig(filename) #save this
+    plt.close()
