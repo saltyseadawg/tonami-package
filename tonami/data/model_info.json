@@ -1,0 +1,1 @@
+{"0":{"Date":1650657941,"Accuracy":0.9588857069,"Segments":3,"Preprocessing":"LDA","Train Size":0.8,"Type":"SVM (RBF)"},"1":{"Date":1650657970,"Accuracy":0.9397928036,"Segments":3,"Preprocessing":"None","Train Size":0.1,"Type":"SVM (RBF)"}}
