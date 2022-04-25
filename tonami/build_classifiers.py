@@ -61,6 +61,7 @@ def get_pipe_from_index(index):
 
 def build_all():
     print_results = False
+    n_splits = 5
 
     for index in range(16):
         print('Working on: ', index)
@@ -68,4 +69,5 @@ def build_all():
         info = get_info_from_index(index)
         pipe = get_pipe_from_index(index)
 
-        c.get_data_from_pipe(pipe, info=info, print_results=print_results)
+        c.make_pkl_from_pipe(pipe, info=info, print_results=print_results)
+        c.make_cvs_from_pipe(pipe, info=info, n_splits=n_splits, print_results=print_results)
