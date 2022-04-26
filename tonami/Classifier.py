@@ -15,9 +15,10 @@ from sklearn.model_selection import StratifiedShuffleSplit, cross_val_score
 import matplotlib.pyplot as plt
 
 from tonami import pitch_process_batch as ppb
+from tonami import CrossValidate as tcv
 
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
-CONFUSION_FILEPATH = 'temp/'
+CONFUSION_FILEPATH = 'temp/confusion_matrix/'
 PICKLED_FILEPATH = 'tonami/data/pickled_models/'
 MODEL_CVS_FILEPATH = 'tonami/data/model_cvs_info.json'
 MODEL_PKL_FILEPATH = 'tonami/data/model_pkl_info.json'
@@ -34,11 +35,10 @@ class Classifier:
         probabilities = self.clf.predict_proba(features)
         return prediction, probabilities
 
-def insert_model_data(filepath, index, new_row): 
-    existing_data = pd.read_json(filepath, orient="index")
-    existing_data.loc[index] = new_row
-    existing_data = existing_data.sort_index().reset_index(drop=True)
-    existing_data.to_json(filepath, orient="index", date_format=None, date_unit='s')
+def insert_model_data(df, index, new_row): 
+    df.loc[index] = new_row
+    df = df.sort_index().reset_index(drop=True)
+    return df
 
 def get_data_sets(speakers, train_size):
     '''
@@ -75,22 +75,25 @@ def save_pipeline_pkl(pipe, index):
     file_name = PICKLED_FILEPATH + "pickled_" + str(index) + ".pkl"
     pickle.dump(pipe, open(file_name, 'wb'))
 
-def save_pipeline_data(index, score, y_train_dist, y_test_dist, y_train_len, y_test_len):
+def save_pipeline_data(json_refs, index, best_est_dict):
     '''
     Saves the pipeline data as a json.
     '''
 
     pkl_row = {
         'Date': int(datetime.now().timestamp()),
-        'Accuracy': score,
-        'Train Distribution': y_train_dist,
-        'Test Distribution': y_test_dist,
-        'Train Number': y_train_len,
-        'Test Number': y_test_len
+        'Accuracy': best_est_dict['test_score'],
+        'Fit Time / sample': best_est_dict['fit_time']/best_est_dict['n_train_samples'],
+        'Score Time / sample': best_est_dict['score_time']/best_est_dict['n_test_samples'],
+        'Explained Variance': best_est_dict['explained_variance'],
+        'Train Distribution': best_est_dict['train_dist'],
+        'Test Distribution': best_est_dict['test_dist'],
+        'Train Number': best_est_dict['n_train_samples'],
+        'Test Number': best_est_dict['n_test_samples'],
     }
-    insert_model_data(MODEL_PKL_FILEPATH, index, pkl_row)
+    json_refs['model_pkl'] = insert_model_data(json_refs['model_pkl'], index, pkl_row)
 
-def save_model_cvs_info(info, scores):
+def save_model_cvs_info(json_refs, info, scores):
     '''
     Saves the model's information and cvs as a json.
     '''
@@ -100,59 +103,67 @@ def save_model_cvs_info(info, scores):
         'Preprocessing': info['preprocessing'],
         'Train Size': info['train_size'],
         'Type': info['type'],
-        'mean': np.mean(scores),
-        'std': np.std(scores),
-        'min': np.min(scores),
-        'max': np.max(scores)
+        'mean': scores['test_score_stats']['mean'],
+        'std': scores['test_score_stats']['std'],
+        'min': scores['test_score_stats']['min'],
+        'max': scores['test_score_stats']['max'],
+        'CV Splits': info['n_splits'],
+        'Segment Features': scores['best_estimator_dict']['n_segment_features'],
+        'Model Features': scores['best_estimator_dict']['n_model_features'],
+        'Train Score': scores['train_score'],
+        'Fit Time': scores['fit_time']['mean_total'],
+        'Fit Time / sample': scores['fit_time']['mean_per_sample'],
+        'Score Time': scores['score_time']['mean_total'],
+        'Score Time / sample': scores['score_time']['mean_per_sample'],
+        'Explained Variance': scores['explained_variance']
     }
-    insert_model_data(MODEL_CVS_FILEPATH, info['index'], cvs_row)
+    json_refs["model_cvs"] = insert_model_data(json_refs["model_cvs"], info['index'], cvs_row)
 
 def save_confusion_matrix(y_test, y_pred, index):
     '''
     Creates a confusion matrix and saves it
     '''
-    #TODO: labels might not be in the right order looooool could be 4 3 2 1?
     plt.figure()
-    img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred), display_labels=["1", "2", "3", "4"])
+    img = sklearn.metrics.ConfusionMatrixDisplay(sklearn.metrics.confusion_matrix(y_test, y_pred, labels=[1, 2, 3, 4]), display_labels=["1", "2", "3", "4"])
     img.plot()
     filename = CONFUSION_FILEPATH + 'confusion_' + str(index) + '.jpg'
     plt.savefig(filename)
     plt.close()
 
-def make_pkl_from_pipe(pipe, info, speakers=[], print_results=True):
+def make_pkl_from_cvs(json_refs, scores, info, print_results=True):
     '''
     Takes in pipeline and name. Gets datasets, trains and saves pipeline as pkl and stats.
     '''
-    X_train, X_test, y_train, y_test = get_data_sets(speakers, info['train_size'])
-    pipe.fit(X_train, y_train)
-    y_pred = pipe.predict(X_test)
-    score = balanced_accuracy_score(y_test, y_pred)
-    y_train_dist, y_train_len = get_data_set_stats(y_train)
-    y_test_dist, y_test_len = get_data_set_stats(y_test)
+    best_est_dict = scores['best_estimator_dict']
+    pipe = best_est_dict['estimator']
 
     save_pipeline_pkl(pipe, info['index'])
-    save_pipeline_data(info['index'], score, y_train_dist, y_test_dist, y_train_len, y_test_len)
-    save_confusion_matrix(y_test, y_pred, info['index'])
+    json_refs = save_pipeline_data(json_refs, info['index'], best_est_dict)
+    save_confusion_matrix(best_est_dict['y_test'], best_est_dict['y_pred'], info['index'])
 
     if print_results:
-        print('score: ', score)
-        print('train samples: ', y_train_len)
-        print('train dist: ', y_train_dist)
-        print('test samples: ', y_test_len)
-        print('test dist: ', y_test_dist)
+        print('test_score: ', best_est_dict['test_score'])
+        print('train samples: ', best_est_dict['n_train_samples'])
+        print('train dist: ', best_est_dict['train_dist'])
+        print('test samples: ', best_est_dict['n_test_samples'])
+        print('test dist: ', best_est_dict['test_dist'])
 
-def make_cvs_from_pipe(pipe, info, speakers=[], n_splits=5, print_results=True):
+def make_cvs_from_pipe(json_refs, pipe, info, n_splits=5, speakers=[], print_results=True):
     '''
-    Takes in pipeline and name. Runs cross validation and saves info and score stats.
+    Takes in pipeline and name. Runs cross validation (custom) and saves info and score stats.
     '''
     X_train, _, y_train, _ = get_data_sets(speakers, 1.0)
     cv = StratifiedShuffleSplit(n_splits=n_splits, train_size=info['train_size'])
-    scores = cross_val_score(pipe, X_train, y_train, cv=cv, scoring='balanced_accuracy', n_jobs=-1)
+    scores = tcv.cross_validate_tonami(pipe, X_train, y_train, cv=cv, n_jobs=-1)
 
-    save_model_cvs_info(info, scores)
+    info['n_splits'] = n_splits
+    save_model_cvs_info(json_refs, info, scores)
 
     if print_results:
-        print("score: %.3f ± %.3f (%.3f,%.3f)" % (np.mean(scores), np.std(scores), np.amin(scores), np.amax(scores)))
+        score_stats = scores['test_score_stats']
+        print("test_scores: %.3f ± %.3f (%.3f,%.3f)" % (score_stats['mean'], score_stats['std'], score_stats['min'], score_stats['max']))
+
+    return scores
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
