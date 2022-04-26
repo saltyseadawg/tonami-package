@@ -35,14 +35,14 @@ class Classifier:
         probabilities = self.clf.predict_proba(features)
         return prediction, probabilities
 
-def insert_model_data(df, index, new_row): 
+def _insert_model_data(df, index, new_row): 
     df.loc[index] = new_row
     df = df.sort_index().reset_index(drop=True)
     return df
 
-def get_data_sets(speakers, train_size):
+def _get_data_sets(speakers):
     '''
-    Reads data from json and splits data based on desired speakers and train_size
+    Reads data from json and splits data based on desired speakers and performs end_to_end
     '''
     pitch_data = pd.read_json(PITCH_FILEPATH)
 
@@ -51,35 +51,12 @@ def get_data_sets(speakers, train_size):
 
     label, data = ppb.end_to_end(pitch_data)
 
-    if train_size != 1.0:
-        return sklearn.model_selection.train_test_split(data, label, train_size=train_size)
-    else:
-        return data, [], label, []
+    return data, label
 
-def get_data_set_stats(y):
+def _update_model_pkl(json_refs, index, best_est_dict):
     '''
-    Returns y's distribution percentage with labels and length of y
+    Takes best estimator from cross-validation and updates model_pkl with information
     '''
-    hist = Counter(y)
-    num = len(y)
-    dist = [(i, hist[i] / num * 100.0) for i in hist]
-    dist = sorted(dist, key=lambda tup: tup[0])
-    dist = [dist[0][1], dist[1][1], dist[2][1], dist[3][1]]
-    dist = np.around(dist, 2)
-    return dist, num
-
-def save_pipeline_pkl(pipe, index):
-    '''
-    Saves the pipeline data in a pickle file to be loaded later
-    '''
-    file_name = PICKLED_FILEPATH + "pickled_" + str(index) + ".pkl"
-    pickle.dump(pipe, open(file_name, 'wb'))
-
-def save_pipeline_data(json_refs, index, best_est_dict):
-    '''
-    Saves the pipeline data as a json.
-    '''
-
     pkl_row = {
         'Date': int(datetime.now().timestamp()),
         'Accuracy': best_est_dict['test_score'],
@@ -91,13 +68,12 @@ def save_pipeline_data(json_refs, index, best_est_dict):
         'Train Number': best_est_dict['n_train_samples'],
         'Test Number': best_est_dict['n_test_samples'],
     }
-    json_refs['model_pkl'] = insert_model_data(json_refs['model_pkl'], index, pkl_row)
+    json_refs['model_pkl'] = _insert_model_data(json_refs['model_pkl'], index, pkl_row)
 
-def save_model_cvs_info(json_refs, info, scores):
+def _update_model_cvs(json_refs, info, scores):
     '''
-    Saves the model's information and cvs as a json.
+    Takes pipe info and stats from cross-validation and updates model_cvs with information
     '''
-
     cvs_row = {
         'Segments': info['segments'],
         'Preprocessing': info['preprocessing'],
@@ -117,9 +93,16 @@ def save_model_cvs_info(json_refs, info, scores):
         'Score Time / sample': scores['score_time']['mean_per_sample'],
         'Explained Variance': scores['explained_variance']
     }
-    json_refs["model_cvs"] = insert_model_data(json_refs["model_cvs"], info['index'], cvs_row)
+    json_refs["model_cvs"] = _insert_model_data(json_refs["model_cvs"], info['index'], cvs_row)
 
-def save_confusion_matrix(y_test, y_pred, index):
+def _save_pipeline_pkl(pipe, index):
+    '''
+    Saves the pipeline data in a pickle file to be loaded later
+    '''
+    file_name = PICKLED_FILEPATH + "pickled_" + str(index) + ".pkl"
+    pickle.dump(pipe, open(file_name, 'wb'))
+
+def _save_confusion_matrix(y_test, y_pred, index):
     '''
     Creates a confusion matrix and saves it
     '''
@@ -130,6 +113,23 @@ def save_confusion_matrix(y_test, y_pred, index):
     plt.savefig(filename)
     plt.close()
 
+def make_cvs_from_pipe(json_refs, pipe, info, n_splits=5, speakers=[], print_results=True):
+    '''
+    Takes in pipeline and name. Runs cross validation (custom) and saves info and score stats.
+    '''
+    X, y = _get_data_sets(speakers)
+    cv = StratifiedShuffleSplit(n_splits=n_splits, train_size=info['train_size'])
+    scores = tcv.cross_validate_tonami(pipe, X, y, cv=cv, n_jobs=-1)
+
+    info['n_splits'] = n_splits
+    _update_model_cvs(json_refs, info, scores)
+
+    if print_results:
+        score_stats = scores['test_score_stats']
+        print("test_scores: %.3f ± %.3f (%.3f,%.3f)" % (score_stats['mean'], score_stats['std'], score_stats['min'], score_stats['max']))
+
+    return scores
+
 def make_pkl_from_cvs(json_refs, scores, info, print_results=True):
     '''
     Takes in pipeline and name. Gets datasets, trains and saves pipeline as pkl and stats.
@@ -137,9 +137,9 @@ def make_pkl_from_cvs(json_refs, scores, info, print_results=True):
     best_est_dict = scores['best_estimator_dict']
     pipe = best_est_dict['estimator']
 
-    save_pipeline_pkl(pipe, info['index'])
-    json_refs = save_pipeline_data(json_refs, info['index'], best_est_dict)
-    save_confusion_matrix(best_est_dict['y_test'], best_est_dict['y_pred'], info['index'])
+    _save_pipeline_pkl(pipe, info['index'])
+    json_refs = _update_model_pkl(json_refs, info['index'], best_est_dict)
+    _save_confusion_matrix(best_est_dict['y_test'], best_est_dict['y_pred'], info['index'])
 
     if print_results:
         print('test_score: ', best_est_dict['test_score'])
@@ -147,23 +147,6 @@ def make_pkl_from_cvs(json_refs, scores, info, print_results=True):
         print('train dist: ', best_est_dict['train_dist'])
         print('test samples: ', best_est_dict['n_test_samples'])
         print('test dist: ', best_est_dict['test_dist'])
-
-def make_cvs_from_pipe(json_refs, pipe, info, n_splits=5, speakers=[], print_results=True):
-    '''
-    Takes in pipeline and name. Runs cross validation (custom) and saves info and score stats.
-    '''
-    X_train, _, y_train, _ = get_data_sets(speakers, 1.0)
-    cv = StratifiedShuffleSplit(n_splits=n_splits, train_size=info['train_size'])
-    scores = tcv.cross_validate_tonami(pipe, X_train, y_train, cv=cv, n_jobs=-1)
-
-    info['n_splits'] = n_splits
-    save_model_cvs_info(json_refs, info, scores)
-
-    if print_results:
-        score_stats = scores['test_score_stats']
-        print("test_scores: %.3f ± %.3f (%.3f,%.3f)" % (score_stats['mean'], score_stats['std'], score_stats['min'], score_stats['max']))
-
-    return scores
 
 def ml_times():
     pitch_data = pd.read_json(PITCH_FILEPATH)
@@ -193,7 +176,7 @@ def t_sne(filename="t_sne.png"):
     # normalize each speaker's pitch individually
     for i in range(len(speakers)):
         spkr_data = pitch_data.loc[pitch_data['speaker'] == speakers[i]]
-        spkr_label, spkr_feats, = end_to_end(spkr_data)
+        spkr_label, spkr_feats, = ppb.end_to_end(spkr_data)
         feat_arrs.append(spkr_feats)
         label_arrs.append(spkr_label)
 

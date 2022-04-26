@@ -70,12 +70,13 @@ def get_pipe_from_index(index):
     return sklearn.pipeline.Pipeline(pipe)
 
 def build_all(print_results = False):
+    # dummy dict to pass dataframes by ref
     json_refs = {
         "model_cvs": pd.read_json(MODEL_CVS_FILEPATH, orient="index"),
         "model_pkl": pd.read_json(MODEL_PKL_FILEPATH, orient="index"),
     }
 
-    for index in range(16):
+    for index in range(9):
         print('Working on: ', index)
 
         info = get_info_from_index(index)
