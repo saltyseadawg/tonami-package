@@ -60,16 +60,16 @@ class Utterance:
         else:
             print("attempted to create invalid Utterance")
 
-    def pre_process(self, user) -> Tuple[npt.NDArray[float], npt.NDArray[bool], npt.NDArray[float]]:
+    def pre_process(self, user, n_segments) -> Tuple[npt.NDArray[float], npt.NDArray[bool], npt.NDArray[float]]:
         """Prepares the audio track for classification and visualization.
         """
-        interp, nans = pp.preprocess(self.pitch_contour)
+        interp, nans = pp.preprocess(self.pitch_contour, n_segments)
         interp_np = np.array([interp], dtype=float)
         profile = user.get_pitch_profile()
         
         avgd = pp.moving_average(interp_np)
         normalized_pitch = pp.normalize_pitch(avgd, profile['max_f0'], profile['min_f0'])
-        features = np.array([pp.basic_feat_calc(normalized_pitch[0])])
+        features = np.array([pp.basic_feat_calc(normalized_pitch[0], n_segments)])
         self.normalized_pitch = normalized_pitch
 
         return normalized_pitch, nans, features #nans - mask
