@@ -17,6 +17,7 @@ class Index(IntFlag):
     TYPE1 = 2 << 0
     TYPE2 = 1
 
+N_CLASSES = 4
 CV_N_SPLITS = 5
 NATIVE_SPEAKERS_DIR = 'data/native speakers/'
 USER_AUDIO_DIR = 'data/users (balanced)/'
@@ -49,7 +50,7 @@ def _get_info_from_index(index):
 
     return info
 
-def _get_pipe_from_index(index):
+def _get_pipe_from_index(index, n_segments):
     def _get_type(index):
         # Since they are the last 2 bits
         model_num = index % 4
@@ -84,7 +85,7 @@ def build_all(print_results = False):
         print('Working on: ', index)
 
         info = _get_info_from_index(index)
-        pipe = _get_pipe_from_index(index)
+        pipe = _get_pipe_from_index(index, info['segments'])
 
         scores = c.make_cvs_from_pipe(json_refs, pipe, info=info, n_splits=CV_N_SPLITS, print_results=print_results)
         c.make_pkl_from_cvs(json_refs, best_estimator_dict=scores['best_estimator_dict'], index=info['index'], print_results=print_results)
@@ -96,7 +97,7 @@ def predict_all():
     model_preds = pd.read_csv(MODEL_PREDS_FILEPATH, index_col='word key')
     native_speakers_files = os.listdir(NATIVE_SPEAKERS_DIR)
     user_audio_files = os.listdir(USER_AUDIO_DIR)
-    clf = c.Classifier(4)
+    clf = c.Classifier(N_CLASSES)
 
     for model_num in range(16):
         model_filename = PICKLED_FILEPATH + 'pickled_' + str(model_num) + '.pkl'

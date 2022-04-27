@@ -1,6 +1,5 @@
 # Modified cross_validate code from skelarn.model_selection.cross_validate
 # Needed to modify to get 
-# - average explained variances from preprocessing
 # - train and test distributions of best estimator
 
 import time
@@ -61,7 +60,6 @@ def cross_validate_tonami(estimator, X, y, cv=None, n_jobs=None):
             "mean_total":       np.mean(results["score_time"]),
             "mean_per_sample":  np.mean(np.divide(results["score_time"], results["n_test_samples"])),
         },
-        "explained_variance":   np.mean(results["explained_variance"]),
         "best_estimator_dict":  results_indiv[np.argmax(results["test_score"])],
     }
 
@@ -97,7 +95,6 @@ def _fit_and_score(estimator, X, y, scorer, train, test):
         "y_pred": estimator.predict(X_test),
         "n_model_features": n_model_features,
         "n_segment_features": n_model_features  if preprocessing is None else preprocessing.n_features_in_,
-        "explained_variance": 1.0               if preprocessing is None else np.sum(preprocessing.explained_variance_ratio_),
     }
     result["train_dist"],   result["n_train_samples"] = _get_data_set_stats(y_train)
     result["test_dist"],    result["n_test_samples"] =  _get_data_set_stats(y_test)

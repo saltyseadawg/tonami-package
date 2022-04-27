@@ -58,7 +58,6 @@ def _update_model_pkl(json_refs, index, best_estimator_dict):
         'Accuracy': best_estimator_dict['test_score'],
         'Fit Time / sample': best_estimator_dict['fit_time']/best_estimator_dict['n_train_samples'],
         'Score Time / sample': best_estimator_dict['score_time']/best_estimator_dict['n_test_samples'],
-        'Explained Variance': best_estimator_dict['explained_variance'],
         'Train Distribution': best_estimator_dict['train_dist'],
         'Test Distribution': best_estimator_dict['test_dist'],
         'Train Number': best_estimator_dict['n_train_samples'],
@@ -87,7 +86,6 @@ def _update_model_cvs(json_refs, info, scores):
         'Fit Time / sample': scores['fit_time']['mean_per_sample'],
         'Score Time': scores['score_time']['mean_total'],
         'Score Time / sample': scores['score_time']['mean_per_sample'],
-        'Explained Variance': scores['explained_variance']
     }
     json_refs["model_cvs"] = _insert_model_data(json_refs["model_cvs"], info['index'], cvs_row)
 
@@ -107,7 +105,7 @@ def _save_confusion_matrix(y_test, y_pred, index):
     img.plot()
     filename = CONFUSION_FILEPATH + 'confusion_' + str(index) + '.jpg'
     plt.savefig(filename)
-    plt.close()
+    plt.close('all')
 
 def make_cvs_from_pipe(json_refs, pipe, info, n_splits=5, speakers=[], print_results=True):
     '''
