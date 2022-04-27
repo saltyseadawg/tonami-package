@@ -23,12 +23,12 @@ warnings.filterwarnings(
 PITCH_FILEPATH = 'data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json'
 
 # VAD -> truncate -> check for nans (drop tracks with nans)
-# Segment -> divide into 3
+# Segment -> divide into n_segments
 # Find mean pitch
 # Find differences between means
-# Final matrix (~9000,6 i.e. means, mean diffs)
+# Final matrix (~9000, (n_segments*(n_segments+1)/2) i.e. means, mean diffs)
 
-def basic_feature_extraction(pitch_contours: npt.NDArray[float]) -> npt.NDArray:
+def basic_feature_extraction(pitch_contours: npt.NDArray[float], n_segments) -> npt.NDArray:
     """
     Batch feature extraction for multiple pitch contours after performing
     additional processing steps in the following order:
@@ -36,9 +36,9 @@ def basic_feature_extraction(pitch_contours: npt.NDArray[float]) -> npt.NDArray:
         - normalizing the pitch contour onto a 5 point scale
 
     Returns:
-        np.array: Nx6 array of feature vectors for tone classification
+        np.array: Nx(n_segments*(n_segments+1)/2) array of feature vectors for tone classification
     """
-    features = np.empty((pitch_contours.shape[0],6))
+    features = np.empty((pitch_contours.shape[0], int(n_segments*(n_segments+1)/2)))
     # calcualte features - not irregular <3
     pitch_max, pitch_min = max_min_f0(pitch_contours)
     for i in range(pitch_contours.shape[0]):
@@ -46,11 +46,11 @@ def basic_feature_extraction(pitch_contours: npt.NDArray[float]) -> npt.NDArray:
         avgd = moving_average(pitch_contours[i])
         normalized = normalize_pitch(avgd, pitch_max, pitch_min)
 
-        features[i] = basic_feat_calc(normalized)
+        features[i] = basic_feat_calc(normalized, n_segments)
 
     return features
     
-def basic_feat_calc(pitch_contour: npt.NDArray[float]) -> npt.NDArray:
+def basic_feat_calc(pitch_contour: npt.NDArray[float], n_segments) -> npt.NDArray:
     """
     Calculates the features from a single pitch contour. Refer to Liao et al.(2010)
     paper for feature details:
@@ -60,6 +60,7 @@ def basic_feat_calc(pitch_contour: npt.NDArray[float]) -> npt.NDArray:
 
     Args:
         pitch_contour (np.array): pitch values from a single utterance
+        n_segments: number of segments
         
     Returns:
         np.array: 1D feature vector for tone classification 
@@ -67,18 +68,21 @@ def basic_feat_calc(pitch_contour: npt.NDArray[float]) -> npt.NDArray:
     # pitch_contour is segmented
     # voice activity detection
 
-    # Split into 3 bc the decision tree paper did it
-    segments = np.array_split(pitch_contour, 3)
-    features = np.empty(6)
+    # Split into n_segments
+    segments = np.array_split(pitch_contour, n_segments)
+    features = np.empty(int(n_segments*(n_segments+1)/2))
 
-    # feats 0-2: segment means
-    for i in range(len(segments)):
+    # feats 0-n_segments-1: segment means
+    for i in range(n_segments):
         features[i] = segments[i].mean()
     
-    # feats 3-5: diff b/w means
-    features[3] = features[1] - features[0]
-    features[4] = features[2] - features[1]
-    features[5] = features[2] - features[0]
+    # feats n_segments-last: diff b/w means
+    index = n_segments
+    for i in range(0, n_segments-1):
+        mean_left = features[i]
+        for j in range(i+1, n_segments):
+            features[index] = features[j] - mean_left
+            index += 1
 
     return features
 
@@ -327,7 +331,7 @@ def pad_matrix(v, fillval=np.nan):
         out[mask] = np.concatenate(v)
         return out
 
-def preprocess(pitch_contour: npt.NDArray[float]) -> Tuple[npt.NDArray[float], npt.NDArray[bool]]:
+def preprocess(pitch_contour: npt.NDArray[float], n_segments) -> Tuple[npt.NDArray[float], npt.NDArray[bool]]:
     """
     Preprocesses a single raw pitch contour by:
         - truncating beginning and end silences
@@ -335,6 +339,7 @@ def preprocess(pitch_contour: npt.NDArray[float]) -> Tuple[npt.NDArray[float], n
 
     Args:
         pitch_contour (np.array): f0 values for a single pitch contour
+        n_segments: number of segments
 
     Returns:
         np.array: 1D array of a pitch contour
@@ -343,6 +348,8 @@ def preprocess(pitch_contour: npt.NDArray[float]) -> Tuple[npt.NDArray[float], n
     """
     # truncated, but irregular
     voiced = get_voice_activity(pitch_contour)
+    if len(voiced) < n_segments:
+        return [float("NaN")], [True]
     #TODO: interp pathway
     cast_arr = np.array(voiced, dtype=float)
     nans, idx = get_nan_idx(cast_arr)

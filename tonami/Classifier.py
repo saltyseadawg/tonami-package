@@ -37,7 +37,7 @@ def _insert_model_data(df, index, new_row):
     df = df.sort_index().reset_index(drop=True)
     return df
 
-def _get_data_sets(speakers):
+def _get_data_sets(speakers, n_segments):
     '''
     Reads data from json and splits data based on desired speakers and performs end_to_end
     '''
@@ -46,7 +46,7 @@ def _get_data_sets(speakers):
     if speakers:
         pitch_data = pitch_data.loc[pitch_data['speaker'].isin(speakers)]
 
-    label, data = end_to_end(pitch_data)
+    label, data = end_to_end(pitch_data, n_segments)
     return data, label
 
 def _update_model_pkl(json_refs, index, best_estimator_dict):
@@ -115,7 +115,7 @@ def make_cvs_from_pipe(json_refs, pipe, info, n_splits=5, speakers=[], print_res
     '''
     info['n_splits'] = n_splits
 
-    X, y = _get_data_sets(speakers)
+    X, y = _get_data_sets(speakers, info['segments'])
     cv=StratifiedShuffleSplit(n_splits=n_splits, train_size=info['train_size'])
     scores = cross_validate_tonami( pipe, X, y, cv=cv, n_jobs=-1)
 

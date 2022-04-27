@@ -34,12 +34,13 @@ def get_valid_mask(contours: npt.NDArray[float]) -> npt.NDArray[bool]:
     valid_row_mask = ~np.isnan(padded).any(axis=1)
     return valid_row_mask
 
-def preprocess_all(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
+def preprocess_all(data: pd.DataFrame, n_segments) -> Tuple[npt.NDArray[int], npt.NDArray]:
     """
     Batch preprocessing of raw pitch contours with tone category information.
 
     Args:
         data (pd.DataFrame): dataframe of raw pitch contours with tone label
+        n_segments: number of segments
 
     Returns:
         np.array: valid and preprocessed pitch contours
@@ -52,7 +53,7 @@ def preprocess_all(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
 
     truncated = []
     for i in range(tone.shape[0]):
-        pitch_contour, _ = pp.preprocess(tone[i])
+        pitch_contour, _ = pp.preprocess(tone[i], n_segments)
         truncated.append(pitch_contour)
 
     truncated_np = np.array(truncated, dtype=object)
@@ -64,25 +65,26 @@ def preprocess_all(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
 
     return label_valid, data_valid
 
-def end_to_end(data: pd.DataFrame) -> Tuple[npt.NDArray[int], npt.NDArray]:
+def end_to_end(data: pd.DataFrame, n_segments) -> Tuple[npt.NDArray[int], npt.NDArray]:
     """
     Batch processes pitch contours with tone categories for training classifiers.
 
     Args:
         data (pd.DataFrame): dataframe of raw pitch contours with tone label
+        n_segments: number of segments
     
     Returns:
         np.array: 1D array of tone labels
-        np.array: Nx6 array of feature vectors for tone classification
+        np.array: Nx(n_segments*(n_segments+1)/2) array of feature vectors for tone classification
     """
     # 1. read in the data
     # 2. stick into feature extraction of choice
     # 3. classify
     # 4. profit
 
-    label_valid, data_valid = preprocess_all(data)
+    label_valid, data_valid = preprocess_all(data, n_segments)
 
-    features = pp.basic_feature_extraction(data_valid)
+    features = pp.basic_feature_extraction(data_valid, n_segments)
 
     #TODO: JANKY ASS FILLER, NEEDS TO BE CHANGED LOL
     # tone1_counter = 0

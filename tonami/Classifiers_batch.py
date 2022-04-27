@@ -80,7 +80,7 @@ def build_all(print_results = False):
         "model_pkl": pd.read_json(MODEL_PKL_FILEPATH, orient="index"),
     }
 
-    for index in range(16):
+    for index in range(32):
         print('Working on: ', index)
 
         info = _get_info_from_index(index)
