@@ -55,9 +55,9 @@ def _get_pipe_from_index(index):
         model_num = index % 4
 
         if model_num == 0:
-            return SVM(gamma='auto')
+            return SVM(probability=True, gamma='auto')
         elif model_num == 1:
-            return SVM(gamma='auto', kernel='linear')
+            return SVM(probability=True, gamma='auto', kernel='linear')
         elif model_num == 2:
             return DT(criterion='entropy')
         else:
