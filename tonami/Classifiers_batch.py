@@ -1,8 +1,11 @@
 import pandas as pd
 from os import listdir
 
-import sklearn.pipeline
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.neighbors import KNeighborsClassifier as KNC
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC as SVM
+from sklearn.tree import DecisionTreeClassifier as DT
 
 from tonami import Classifier as c
 
@@ -17,13 +20,13 @@ class Index(IntFlag):
 CV_N_SPLITS = 5
 NATIVE_SPEAKERS_DIR = 'data/native speakers/'
 USER_AUDIO_DIR = 'data/users (balanced)/'
-MODEL_PREDS_FILEPATH = 'tonami/data/model_predictions.csv'
 PICKLED_FILEPATH = 'tonami/data/pickled_models/'
 MODEL_CVS_FILEPATH = 'tonami/data/model_cvs_info.json'
 MODEL_PKL_FILEPATH = 'tonami/data/model_pkl_info.json'
+MODEL_PREDS_FILEPATH = 'tonami/data/model_predictions.csv'
 
-def get_info_from_index(index):
-    def get_type(index):
+def _get_info_from_index(index):
+    def _get_type(index):
         # Since they are the last 2 bits
         model_num = index % 4
 
@@ -36,54 +39,55 @@ def get_info_from_index(index):
         else:
             return 'kNN'
 
-    info = {}
-
-    info['index'] = index
-    info['segments'] = 5 if index & Index.SEGMENTS.value else 3
-    info['preprocessing'] = 'LDA' if index & Index.PREPROCESSING.value else 'None'
-    info['train_size'] = 0.8 if index & Index.SIZE.value else 0.1
-    info['type'] = get_type(index)
+    info = {
+        "index": index,
+        "segments":         5       if index & Index.SEGMENTS.value else        3,
+        "preprocessing":    'LDA'   if index & Index.PREPROCESSING.value else   'None',
+        "train_size":       0.8     if index & Index.SIZE.value else            0.1,
+        "type": _get_type(index),
+    }
 
     return info
 
-def get_pipe_from_index(index):
-    def get_type(index):
+def _get_pipe_from_index(index):
+    def _get_type(index):
         # Since they are the last 2 bits
         model_num = index % 4
 
         if model_num == 0:
-            return sklearn.svm.SVC(gamma='auto')
+            return SVM(gamma='auto')
         elif model_num == 1:
-            return sklearn.svm.SVC(gamma='auto', kernel='linear')
+            return SVM(gamma='auto', kernel='linear')
         elif model_num == 2:
-            return sklearn.tree.DecisionTreeClassifier(criterion='entropy')
+            return DT(criterion='entropy')
         else:
-            return sklearn.neighbors.KNeighborsClassifier()
+            return KNC()
 
-    pipe = []
+    return Pipeline([
+        ('preprocessing', LDA() if index & Index.PREPROCESSING.value else None),
+        ('estimator', _get_type(index))
+    ])
 
-    preprocessing = LDA() if index & Index.PREPROCESSING.value else None
-    pipe.append(('preprocessing', preprocessing))
-
-    pipe.append(('estimator', get_type(index)))
-
-    return sklearn.pipeline.Pipeline(pipe)
-
-def build_all(print_results = False):
+def build_all(print_results = False):  
+    '''
+    Performs cross-validation on all model variations except SpeakGoodChinese
+    Records stats/scores of cross-validation and pickles best estimator (based on training data, not on hyperparameters)
+    Only uses default hyperparameters, outlined in get_pipe_from_index
+    '''
     # dummy dict to pass dataframes by ref
     json_refs = {
         "model_cvs": pd.read_json(MODEL_CVS_FILEPATH, orient="index"),
         "model_pkl": pd.read_json(MODEL_PKL_FILEPATH, orient="index"),
     }
 
-    for index in range(9):
+    for index in range(16):
         print('Working on: ', index)
 
-        info = get_info_from_index(index)
-        pipe = get_pipe_from_index(index)
+        info = _get_info_from_index(index)
+        pipe = _get_pipe_from_index(index)
 
         scores = c.make_cvs_from_pipe(json_refs, pipe, info=info, n_splits=CV_N_SPLITS, print_results=print_results)
-        c.make_pkl_from_cvs(json_refs, scores=scores, info=info, print_results=print_results)
+        c.make_pkl_from_cvs(json_refs, best_estimator_dict=scores['best_estimator_dict'], index=info['index'], print_results=print_results)
 
     json_refs["model_cvs"].to_json(MODEL_CVS_FILEPATH, orient="index")
     json_refs["model_pkl"].to_json(MODEL_PKL_FILEPATH, orient="index", date_format=None, date_unit='s')
