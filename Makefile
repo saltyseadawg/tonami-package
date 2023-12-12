@@ -1,4 +1,4 @@
-.PHONY: mount-files build-image push-image pull-image jupyter-server heroku-server lint
+.PHONY: mount-files build-image push-image pull-image jupyter-server heroku-server lint build-app
 
 IMAGE_NAME:=saltyseadawg/tonami-package
 IMAGE_VERSION:=latest
@@ -20,7 +20,7 @@ jupyter-server:
 	docker run -it -p 8888:8888 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION)
 
 heroku-server:
-	docker run -it -p 8501:8501 -v $(PWD)/:/app/ $(IMAGE_NAME):$(IMAGE_VERSION) /bin/bash -c \
+	docker run -it -p 8501:8501 -v $(PWD)/:/app/ saltyseadawg/tonami-app:$(IMAGE_VERSION) /bin/bash -c \
 	"streamlit run tonami_interface.py"
 
 # code formatting
@@ -40,11 +40,11 @@ test-container:
 	"python -m pytest tests/"
 
 # release commands
-build-heroku:
-	docker build -f Dockerfile.heroku -t registry.heroku.com/tonami-testing/web .
+build-app:
+	docker build -f Dockerfile.app -t saltyseadawg/tonami-app:latest .
 
-push-heroku:
-	docker push registry.heroku.com/tonami-testing/web
+push-app:
+	docker push saltyseadawg/tonami-app:latest
 
 image-id:
 	docker inspect --format="{{.Id}}" registry.heroku.com/tonami-testing/web
