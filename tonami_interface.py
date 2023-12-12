@@ -17,7 +17,7 @@ from tonami import user as usr
 from tonami import controller as cont
 from tonami import Classifier as c
 from heroku.interface_utils import *
-from azure.storage.blob import BlobServiceClient
+# from azure.storage.blob import BlobServiceClient
 
 
 import json
@@ -28,7 +28,7 @@ from tonami.audio_utils import convert_audio
 CONNECT_STR = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 EXERCISE_DIR = 'data/tone_perfect/'
 
-st.session_state.blob_service_client = BlobServiceClient.from_connection_string(CONNECT_STR)
+# st.session_state.blob_service_client = BlobServiceClient.from_connection_string(CONNECT_STR)
 
 # if not hasattr(st, "client"):
 #     st.client = pymongo.MongoClient(**st.secrets["mongo"])
@@ -110,7 +110,7 @@ else:
         # user_bytes = convert_audio(st.session_state.user_audio, 'wav').getvalue()
         # with open(st.session_state.user_audio, 'rb') as f:
         #     user_audio_bytes = f.read()
-        upload_file(st.session_state.blob_service_client, st.session_state.user_audio)
+        # upload_file(st.session_state.blob_service_client, st.session_state.user_audio)
         st.audio(st.session_state.user_audio, format="audio/mp3")
 
         # with open(st.session_state.user_audio, "rb") as f:

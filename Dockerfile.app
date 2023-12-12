@@ -1,6 +1,6 @@
-FROM python:3.9.7-slim-buster
+FROM python:3.11-slim-bookworm
 
-RUN apt-get update && apt-get -y install python3-pip ffmpeg
+RUN apt-get update && apt-get -y install python3-pip ffmpeg git
 WORKDIR /app
 
 # COPY data/forvo_zh_好玩.mp3 data/forvo_zh_好玩.mp3
@@ -14,4 +14,4 @@ COPY tonami_interface.py tonami_interface.py
 COPY data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json data/parsed/toneperfect_pitch_librosa_50-500-fminmax.json
 
 
-CMD ["sh", "-c", "streamlit run --server.port $PORT tonami_interface.py"]
+CMD ["sh", "-c", "streamlit run tonami_interface.py"]
